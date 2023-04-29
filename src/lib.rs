@@ -2,6 +2,12 @@
 
 use heapless::Vec;
 
+mod pwm;
+mod rate;
+
+pub use pwm::Pwm;
+pub use rate::Rate;
+
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum State {
     On,
