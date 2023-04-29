@@ -1,6 +1,14 @@
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Pwm {
-    P(u8),
+    P10,
+    P20,
+    P30,
+    P40,
+    P50,
+    P60,
+    P70,
+    P80,
+    P90,
     Pew,
 }
 
@@ -8,16 +16,15 @@ impl Pwm {
     pub fn index(&self) -> usize {
         match self {
             Pwm::Pew => 0,
-            Pwm::P(10) => 1,
-            Pwm::P(20) => 2,
-            Pwm::P(30) => 3,
-            Pwm::P(40) => 4,
-            Pwm::P(50) => 5,
-            Pwm::P(60) => 6,
-            Pwm::P(70) => 7,
-            Pwm::P(80) => 8,
-            Pwm::P(90) => 9,
-            _ => unreachable!(),
+            Pwm::P10 => 1,
+            Pwm::P20 => 2,
+            Pwm::P30 => 3,
+            Pwm::P40 => 4,
+            Pwm::P50 => 5,
+            Pwm::P60 => 6,
+            Pwm::P70 => 7,
+            Pwm::P80 => 8,
+            Pwm::P90 => 9,
         }
     }
 }

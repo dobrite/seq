@@ -26,7 +26,7 @@ impl Output {
     pub fn new(resolution: u32) -> Self {
         Self {
             count: 0,
-            pwm: Pwm::P(50),
+            pwm: Pwm::P50,
             rate: Rate::Unity,
             resolution,
             state: State::On,
@@ -48,7 +48,7 @@ mod tests {
 
         let expected = Output {
             count: 0,
-            pwm: Pwm::P(50),
+            pwm: Pwm::P50,
             rate: Rate::Unity,
             resolution: 1_920,
             state: State::On,
@@ -64,7 +64,7 @@ mod tests {
 
         let expected = Output {
             count: 1,
-            pwm: Pwm::P(50),
+            pwm: Pwm::P50,
             rate: Rate::Unity,
             resolution: 1_920,
             state: State::On,
