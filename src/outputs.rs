@@ -20,7 +20,7 @@ impl Outputs {
         let outputs = {
             let mut o = Vec::new();
             for _ in 0..num {
-                o.push(Output::new()).ok();
+                o.push(Output::new(resolution)).ok();
             }
             o
         };
