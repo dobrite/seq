@@ -1,5 +1,6 @@
 use crate::Output;
 use crate::OutputState;
+use crate::Pwm;
 
 use heapless::Vec;
 
@@ -42,6 +43,10 @@ impl Outputs {
         } else {
             self.count += 1;
         }
+    }
+
+    pub fn set_pwm(&mut self, index: usize, pwm: Pwm) {
+        self.outputs[index].set_pwm(pwm);
     }
 
     pub fn state(&self) -> OutputState {
