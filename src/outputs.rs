@@ -26,7 +26,7 @@ impl Outputs {
         };
 
         Self {
-            count: 0,
+            count: 1,
             outputs,
             resolution,
         }
@@ -37,8 +37,8 @@ impl Outputs {
             o.update();
         }
 
-        if self.count == self.resolution - 1 {
-            self.count = 0;
+        if self.count == self.resolution {
+            self.count = 1;
         } else {
             self.count += 1;
         }
@@ -51,5 +51,46 @@ impl Outputs {
             outputs,
             count: self.count,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::State;
+
+    #[test]
+    fn it_new() {
+        let outputs = Outputs::new(4, 24);
+        let result = outputs.state();
+
+        let mut expected_outputs = Vec::new();
+        expected_outputs.push(State::On).unwrap();
+        expected_outputs.push(State::On).unwrap();
+        expected_outputs.push(State::On).unwrap();
+        expected_outputs.push(State::On).unwrap();
+
+        let expected = OutputState {
+            outputs: expected_outputs,
+            count: 1,
+        };
+
+        assert_eq!(expected, result);
+    }
+
+    #[test]
+    fn it_updates() {
+        let mut outputs = Outputs::new(1, 24);
+        outputs.update();
+        let result = outputs.state();
+
+        let mut expected_states = Vec::new();
+        expected_states.push(State::On).unwrap();
+        let expected = OutputState {
+            outputs: expected_states,
+            count: 2,
+        };
+
+        assert_eq!(expected, result);
     }
 }

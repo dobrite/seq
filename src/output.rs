@@ -25,7 +25,7 @@ impl Default for Output {
 impl Output {
     pub fn new(resolution: u32) -> Self {
         Self {
-            count: 0,
+            count: 1,
             pwm: Pwm::P50,
             rate: Rate::Unity,
             resolution,
@@ -34,7 +34,20 @@ impl Output {
     }
 
     pub fn update(&mut self) {
-        self.count += 1;
+        if self.count == self.resolution {
+            self.count = 1;
+        } else {
+            self.count += 1;
+        }
+
+        let num: f32 = self.pwm.into();
+        let target = num * self.resolution as f32;
+
+        if self.count <= target as u32 {
+            self.state = State::On
+        } else {
+            self.state = State::Off
+        }
     }
 }
 
@@ -47,7 +60,7 @@ mod tests {
         let output = Output::new(1_920);
 
         let expected = Output {
-            count: 0,
+            count: 1,
             pwm: Pwm::P50,
             rate: Rate::Unity,
             resolution: 1_920,
@@ -63,10 +76,73 @@ mod tests {
         output.update();
 
         let expected = Output {
-            count: 1,
+            count: 2,
             pwm: Pwm::P50,
             rate: Rate::Unity,
             resolution: 1_920,
+            state: State::On,
+        };
+
+        assert_eq!(expected, output);
+    }
+
+    #[test]
+    fn it_updates_through_a_full_cycle() {
+        let mut output = Output::new(4);
+
+        let mut expected = Output {
+            count: 1,
+            pwm: Pwm::P50,
+            rate: Rate::Unity,
+            resolution: 4,
+            state: State::On,
+        };
+
+        assert_eq!(expected, output);
+
+        output.update();
+
+        expected = Output {
+            count: 2,
+            pwm: Pwm::P50,
+            rate: Rate::Unity,
+            resolution: 4,
+            state: State::On,
+        };
+
+        assert_eq!(expected, output);
+
+        output.update();
+
+        expected = Output {
+            count: 3,
+            pwm: Pwm::P50,
+            rate: Rate::Unity,
+            resolution: 4,
+            state: State::Off,
+        };
+
+        assert_eq!(expected, output);
+
+        output.update();
+
+        expected = Output {
+            count: 4,
+            pwm: Pwm::P50,
+            rate: Rate::Unity,
+            resolution: 4,
+            state: State::Off,
+        };
+
+        assert_eq!(expected, output);
+
+        output.update();
+
+        expected = Output {
+            count: 1,
+            pwm: Pwm::P50,
+            rate: Rate::Unity,
+            resolution: 4,
             state: State::On,
         };
 
