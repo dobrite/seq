@@ -14,6 +14,7 @@ pub struct Output {
     pwm: Pwm,
     rate: Rate,
     resolution: u32,
+    target: u32,
 }
 
 impl Default for Output {
@@ -24,12 +25,17 @@ impl Default for Output {
 
 impl Output {
     pub fn new(resolution: u32) -> Self {
+        let pwm = Pwm::P50;
+        let ratio: f32 = pwm.into();
+        let target = (ratio * resolution as f32) as u32;
+
         Self {
             count: 1,
-            pwm: Pwm::P50,
+            pwm,
             rate: Rate::Unity,
             resolution,
             state: State::On,
+            target,
         }
     }
 
@@ -40,10 +46,7 @@ impl Output {
             self.count += 1;
         }
 
-        let num: f32 = self.pwm.into();
-        let target = num * self.resolution as f32;
-
-        if self.count <= target as u32 {
+        if self.count <= self.target {
             self.state = State::On
         } else {
             self.state = State::Off
@@ -65,6 +68,7 @@ mod tests {
             rate: Rate::Unity,
             resolution: 1_920,
             state: State::On,
+            target: 960,
         };
 
         assert_eq!(expected, output);
@@ -81,6 +85,7 @@ mod tests {
             rate: Rate::Unity,
             resolution: 1_920,
             state: State::On,
+            target: 960,
         };
 
         assert_eq!(expected, output);
@@ -96,6 +101,7 @@ mod tests {
             rate: Rate::Unity,
             resolution: 4,
             state: State::On,
+            target: 2,
         };
 
         assert_eq!(expected, output);
@@ -108,6 +114,7 @@ mod tests {
             rate: Rate::Unity,
             resolution: 4,
             state: State::On,
+            target: 2,
         };
 
         assert_eq!(expected, output);
@@ -120,6 +127,7 @@ mod tests {
             rate: Rate::Unity,
             resolution: 4,
             state: State::Off,
+            target: 2,
         };
 
         assert_eq!(expected, output);
@@ -132,6 +140,7 @@ mod tests {
             rate: Rate::Unity,
             resolution: 4,
             state: State::Off,
+            target: 2,
         };
 
         assert_eq!(expected, output);
@@ -144,6 +153,7 @@ mod tests {
             rate: Rate::Unity,
             resolution: 4,
             state: State::On,
+            target: 2,
         };
 
         assert_eq!(expected, output);

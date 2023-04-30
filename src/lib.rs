@@ -14,6 +14,6 @@ pub use rate::Rate;
 
 #[derive(Debug, PartialEq)]
 pub struct OutputState {
-    outputs: Vec<State, 4>,
-    count: u32,
+    pub outputs: Vec<State, 4>,
+    pub count: u32,
 }
