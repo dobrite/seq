@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 heapless = { version = "0.7", features = ["cas", "defmt-impl"] }
+oorandom = "11.1.3"
