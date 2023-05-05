@@ -1,5 +1,6 @@
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Pwm {
+    Pew,
     P10,
     P20,
     P30,
@@ -9,7 +10,6 @@ pub enum Pwm {
     P70,
     P80,
     P90,
-    Pew,
 }
 
 impl From<Pwm> for f32 {

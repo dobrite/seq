@@ -9,10 +9,10 @@ pub enum State {
 #[derive(Debug, PartialEq)]
 pub struct Output {
     count: u32,
-    pub state: State,
     pwm: Pwm,
     rate: Rate,
     resolution: u32,
+    pub state: State,
     target: u32,
 }
 
