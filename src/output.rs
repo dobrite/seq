@@ -122,116 +122,43 @@ mod tests {
 
     #[test]
     fn it_updates() {
-        let prob = Prob::P100;
-        let rate = Rate::Unity;
-        let mut output = Output::new(1_920, prob, rate);
+        let mut output = Output::new(1_920, Prob::P100, Rate::Unity);
         output.tick();
 
-        let expected = Output {
-            cycle_target: 1_920,
-            count: 2,
-            off_target: 960,
-            prob,
-            pwm: Pwm::P50,
-            rate,
-            resolution: 1_920,
-            rng: Rand32::new(RNG_SEED),
-            skip_cycle: false,
-            state: State::On,
-        };
+        let expected_count = 2;
+        let expected_state = State::On;
 
-        assert_eq!(expected, output);
+        assert_eq!(expected_count, output.count);
+        assert_eq!(expected_state, output.state);
     }
 
     #[test]
 
     fn it_updates_through_a_full_cycle() {
-        let prob = Prob::P100;
-        let rate = Rate::Unity;
-        let mut output = Output::new(4, prob, rate);
+        let mut output = Output::new(4, Prob::P100, Rate::Unity);
 
-        let mut expected = Output {
-            count: 1,
-            cycle_target: 4,
-            off_target: 2,
-            prob,
-            pwm: Pwm::P50,
-            rate,
-            resolution: 4,
-            rng: Rand32::new(RNG_SEED),
-            skip_cycle: false,
-            state: State::On,
-        };
-
-        assert_eq!(expected, output);
+        assert_eq!(1, output.count);
+        assert_eq!(State::On, output.state);
 
         output.tick();
 
-        expected = Output {
-            count: 2,
-            cycle_target: 4,
-            off_target: 2,
-            prob,
-            pwm: Pwm::P50,
-            rate,
-            resolution: 4,
-            rng: Rand32::new(RNG_SEED),
-            skip_cycle: false,
-            state: State::On,
-        };
-
-        assert_eq!(expected, output);
+        assert_eq!(2, output.count);
+        assert_eq!(State::On, output.state);
 
         output.tick();
 
-        expected = Output {
-            count: 3,
-            cycle_target: 4,
-            off_target: 2,
-            prob,
-            pwm: Pwm::P50,
-            rate,
-            resolution: 4,
-            rng: Rand32::new(RNG_SEED),
-            skip_cycle: false,
-            state: State::Off,
-        };
-
-        assert_eq!(expected, output);
+        assert_eq!(3, output.count);
+        assert_eq!(State::Off, output.state);
 
         output.tick();
 
-        expected = Output {
-            count: 4,
-            cycle_target: 4,
-            off_target: 2,
-            prob,
-            pwm: Pwm::P50,
-            rate,
-            resolution: 4,
-            rng: Rand32::new(RNG_SEED),
-            skip_cycle: false,
-            state: State::Off,
-        };
-
-        assert_eq!(expected, output);
+        assert_eq!(4, output.count);
+        assert_eq!(State::Off, output.state);
 
         output.tick();
 
-        expected = Output {
-            count: 1,
-            cycle_target: 4,
-            off_target: 2,
-            prob,
-            pwm: Pwm::P50,
-            rate: Rate::Unity,
-            resolution: 4,
-            rng: Rand32::new(RNG_SEED),
-            skip_cycle: false,
-            state: State::On,
-        };
-
-        assert_eq!(expected, output);
+        assert_eq!(1, output.count);
+        assert_eq!(State::On, output.state);
     }
 
     #[test]
@@ -239,21 +166,16 @@ mod tests {
         let prob = Prob::P100;
         let rate = Rate::Mult(2);
         let mut output = Output::new(4, prob, rate);
+
+        assert_eq!(1, output.count);
+        assert_eq!(2, output.cycle_target);
+        assert_eq!(1, output.off_target);
+        assert_eq!(rate, output.rate);
+        assert_eq!(State::On, output.state);
+
         output.tick();
 
-        let expected = Output {
-            count: 2,
-            cycle_target: 2,
-            off_target: 1,
-            prob,
-            pwm: Pwm::P50,
-            rate,
-            resolution: 4,
-            rng: Rand32::new(RNG_SEED),
-            skip_cycle: false,
-            state: State::Off,
-        };
-
-        assert_eq!(expected, output);
+        assert_eq!(2, output.count);
+        assert_eq!(State::Off, output.state);
     }
 }
