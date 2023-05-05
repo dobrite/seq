@@ -16,4 +16,34 @@ impl Rng {
             rng: Rand32::new(RNG_SEED),
         }
     }
+
+    pub fn rand_bool(&self) -> bool {
+        self.prob.rand_bool(self.rng)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_randomly_chooses_a_bool_p100() {
+        let rng = Rng::new(Prob::P100);
+
+        assert!(rng.rand_bool());
+    }
+
+    #[test]
+    fn it_randomly_chooses_a_bool_p50() {
+        let rng = Rng::new(Prob::P50);
+
+        assert!(rng.rand_bool());
+    }
+
+    #[test]
+    fn it_randomly_chooses_a_bool_p10() {
+        let rng = Rng::new(Prob::P10);
+
+        assert!(!rng.rand_bool());
+    }
 }
