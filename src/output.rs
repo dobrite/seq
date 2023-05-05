@@ -78,6 +78,12 @@ impl Output {
         };
     }
 
+    pub fn set_prob(&mut self, prob: Prob) {
+        self.rng = Rng::new(prob);
+        self.calc_skip_cycle();
+        self.calc_initial_state();
+    }
+
     pub fn set_pwm(&mut self, pwm: Pwm) {
         self.pwm = pwm;
         self.calc_targets();

@@ -48,6 +48,10 @@ impl Outputs {
         }
     }
 
+    pub fn set_prob(&mut self, index: usize, prob: Prob) {
+        self.outputs[index].set_prob(prob);
+    }
+
     pub fn set_pwm(&mut self, index: usize, pwm: Pwm) {
         self.outputs[index].set_pwm(pwm);
     }
