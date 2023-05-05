@@ -42,6 +42,8 @@ impl Output {
         };
 
         output.calc_targets();
+        output.calc_skip_cycle();
+        output.calc_initial_state();
 
         output
     }
@@ -64,6 +66,18 @@ impl Output {
         self.off_target = (ratio * self.cycle_target as f32) as u32
     }
 
+    fn calc_skip_cycle(&mut self) {
+        self.skip_cycle = !self.rng.rand_bool();
+    }
+
+    fn calc_initial_state(&mut self) {
+        self.state = if self.skip_cycle {
+            State::Off
+        } else {
+            State::On
+        };
+    }
+
     pub fn set_pwm(&mut self, pwm: Pwm) {
         self.pwm = pwm;
         self.calc_targets();
@@ -77,8 +91,14 @@ impl Output {
     pub fn tick(&mut self) {
         if self.count == self.cycle_target {
             self.count = 1;
+            self.calc_skip_cycle();
         } else {
             self.count += 1;
+        }
+
+        if self.skip_cycle {
+            self.state = State::Off;
+            return;
         }
 
         if self.count <= self.off_target {
@@ -171,5 +191,21 @@ mod tests {
 
         assert_eq!(2, output.count);
         assert_eq!(State::Off, output.state);
+    }
+
+    #[test]
+    fn it_skips_cycles_based_on_prob() {
+        let prob = Prob::P10;
+        let rate = Rate::Unity;
+        let mut output = Output::new(4, prob, rate);
+
+        assert_eq!(State::Off, output.state);
+        output.tick();
+        assert_eq!(State::Off, output.state);
+        output.tick();
+        assert_eq!(State::Off, output.state);
+        output.tick();
+        assert_eq!(State::Off, output.state);
+        output.tick();
     }
 }
