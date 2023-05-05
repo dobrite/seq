@@ -19,18 +19,18 @@ pub struct Output {
 
 impl Default for Output {
     fn default() -> Self {
-        Self::new(1_920)
+        Self::new(1_920, Rate::Unity)
     }
 }
 
 impl Output {
-    pub fn new(resolution: u32) -> Self {
+    pub fn new(resolution: u32, rate: Rate) -> Self {
         let pwm = Pwm::P50;
 
         let mut output = Self {
             count: 1,
             pwm,
-            rate: Rate::Unity,
+            rate,
             resolution,
             state: State::On,
             target: 0,
@@ -72,7 +72,7 @@ mod tests {
 
     #[test]
     fn it_new() {
-        let output = Output::new(1_920);
+        let output = Output::new(1_920, Rate::Unity);
 
         let expected = Output {
             count: 1,
@@ -88,7 +88,7 @@ mod tests {
 
     #[test]
     fn it_updates() {
-        let mut output = Output::new(1_920);
+        let mut output = Output::new(1_920, Rate::Unity);
         output.update();
 
         let expected = Output {
@@ -105,7 +105,7 @@ mod tests {
 
     #[test]
     fn it_updates_through_a_full_cycle() {
-        let mut output = Output::new(4);
+        let mut output = Output::new(4, Rate::Unity);
 
         let mut expected = Output {
             count: 1,

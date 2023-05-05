@@ -1,6 +1,7 @@
 use crate::Output;
 use crate::OutputState;
 use crate::Pwm;
+use crate::Rate;
 use crate::Tick;
 
 use heapless::Vec;
@@ -22,7 +23,7 @@ impl Outputs {
         let outputs = {
             let mut o = Vec::new();
             for _ in 0..num {
-                o.push(Output::new(resolution)).ok();
+                o.push(Output::new(resolution, Rate::Unity)).ok();
             }
             o
         };
