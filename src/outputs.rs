@@ -1,4 +1,4 @@
-use crate::{Output, OutputState, Prob, Pwm, Rate, Tick};
+use crate::{output::Output, OutputState, Prob, Pwm, Rate, Tick};
 
 use heapless::Vec;
 

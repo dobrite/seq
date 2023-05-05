@@ -9,7 +9,7 @@ mod pwm;
 mod rate;
 mod rng;
 
-pub use output::{Output, State};
+pub use output::State;
 pub use outputs::Outputs;
 pub use prob::Prob;
 pub use pwm::Pwm;
