@@ -32,7 +32,7 @@ impl From<Prob> for u32 {
 }
 
 impl Prob {
-    pub(crate) fn rand_bool(&self, mut rng: Rand32) -> bool {
+    pub(crate) fn rand_bool(&self, rng: &mut Rand32) -> bool {
         match self {
             Prob::P100 => true,
             &prob => {

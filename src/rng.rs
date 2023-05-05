@@ -17,8 +17,8 @@ impl Rng {
         }
     }
 
-    pub fn rand_bool(&self) -> bool {
-        self.prob.rand_bool(self.rng)
+    pub fn rand_bool(&mut self) -> bool {
+        self.prob.rand_bool(&mut self.rng)
     }
 }
 
@@ -28,21 +28,21 @@ mod tests {
 
     #[test]
     fn it_randomly_chooses_a_bool_p100() {
-        let rng = Rng::new(Prob::P100);
+        let mut rng = Rng::new(Prob::P100);
 
         assert!(rng.rand_bool());
     }
 
     #[test]
     fn it_randomly_chooses_a_bool_p50() {
-        let rng = Rng::new(Prob::P50);
+        let mut rng = Rng::new(Prob::P50);
 
         assert!(rng.rand_bool());
     }
 
     #[test]
     fn it_randomly_chooses_a_bool_p10() {
-        let rng = Rng::new(Prob::P10);
+        let mut rng = Rng::new(Prob::P10);
 
         assert!(!rng.rand_bool());
     }
