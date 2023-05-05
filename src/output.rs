@@ -70,7 +70,7 @@ impl Output {
         self.calc();
     }
 
-    pub fn update(&mut self) {
+    pub fn tick(&mut self) {
         if self.count == self.cycle_target {
             self.count = 1;
         } else {
@@ -109,7 +109,7 @@ mod tests {
     #[test]
     fn it_updates() {
         let mut output = Output::new(1_920, Rate::Unity);
-        output.update();
+        output.tick();
 
         let expected = Output {
             cycle_target: 1_920,
@@ -140,7 +140,7 @@ mod tests {
 
         assert_eq!(expected, output);
 
-        output.update();
+        output.tick();
 
         expected = Output {
             count: 2,
@@ -154,7 +154,7 @@ mod tests {
 
         assert_eq!(expected, output);
 
-        output.update();
+        output.tick();
 
         expected = Output {
             count: 3,
@@ -168,7 +168,7 @@ mod tests {
 
         assert_eq!(expected, output);
 
-        output.update();
+        output.tick();
 
         expected = Output {
             count: 4,
@@ -182,7 +182,7 @@ mod tests {
 
         assert_eq!(expected, output);
 
-        output.update();
+        output.tick();
 
         expected = Output {
             count: 1,
@@ -201,7 +201,7 @@ mod tests {
     fn it_ticks_at_twice_the_rate_with_rate_times_2() {
         let rate = Rate::Mult(2);
         let mut output = Output::new(4, rate);
-        output.update();
+        output.tick();
 
         let expected = Output {
             count: 2,

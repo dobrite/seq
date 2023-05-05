@@ -31,9 +31,9 @@ impl Outputs {
         }
     }
 
-    pub fn update(&mut self) {
+    pub fn tick(&mut self) {
         for o in self.outputs.iter_mut() {
-            o.update();
+            o.tick();
         }
 
         if self.count == self.resolution {
@@ -92,7 +92,7 @@ mod tests {
     fn it_updates() {
         let resolution = 24;
         let mut outputs = Outputs::new(1, resolution);
-        outputs.update();
+        outputs.tick();
         let result = outputs.state();
 
         let mut expected_states = Vec::new();
