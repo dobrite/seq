@@ -19,6 +19,7 @@ pub struct Output {
     rate: Rate,
     resolution: u32,
     rng: Rand32,
+    skip_cycle: bool,
     pub state: State,
 }
 
@@ -41,6 +42,7 @@ impl Output {
             rate,
             resolution,
             rng: Rand32::new(RNG_SEED),
+            skip_cycle: false,
             state: State::On,
         };
 
@@ -111,6 +113,7 @@ mod tests {
             rate,
             resolution: 1_920,
             rng: Rand32::new(RNG_SEED),
+            skip_cycle: false,
             state: State::On,
         };
 
@@ -133,6 +136,7 @@ mod tests {
             rate,
             resolution: 1_920,
             rng: Rand32::new(RNG_SEED),
+            skip_cycle: false,
             state: State::On,
         };
 
@@ -155,6 +159,7 @@ mod tests {
             rate,
             resolution: 4,
             rng: Rand32::new(RNG_SEED),
+            skip_cycle: false,
             state: State::On,
         };
 
@@ -171,6 +176,7 @@ mod tests {
             rate,
             resolution: 4,
             rng: Rand32::new(RNG_SEED),
+            skip_cycle: false,
             state: State::On,
         };
 
@@ -187,6 +193,7 @@ mod tests {
             rate,
             resolution: 4,
             rng: Rand32::new(RNG_SEED),
+            skip_cycle: false,
             state: State::Off,
         };
 
@@ -203,6 +210,7 @@ mod tests {
             rate,
             resolution: 4,
             rng: Rand32::new(RNG_SEED),
+            skip_cycle: false,
             state: State::Off,
         };
 
@@ -219,6 +227,7 @@ mod tests {
             rate: Rate::Unity,
             resolution: 4,
             rng: Rand32::new(RNG_SEED),
+            skip_cycle: false,
             state: State::On,
         };
 
@@ -241,6 +250,7 @@ mod tests {
             rate,
             resolution: 4,
             rng: Rand32::new(RNG_SEED),
+            skip_cycle: false,
             state: State::Off,
         };
 
