@@ -31,7 +31,7 @@ impl Outputs {
         }
     }
 
-    pub fn tick(&mut self) {
+    pub fn tick(&mut self) -> Tick {
         for o in self.outputs.iter_mut() {
             o.tick();
         }
@@ -40,6 +40,10 @@ impl Outputs {
             self.count = 1;
         } else {
             self.count += 1;
+        }
+
+        Tick {
+            major: self.count == 1,
         }
     }
 
@@ -54,12 +58,7 @@ impl Outputs {
     pub fn state(&self) -> OutputState {
         let outputs = self.outputs.iter().map(|o| o.state).collect();
 
-        OutputState {
-            outputs,
-            tick: Tick {
-                major: self.count == 1,
-            },
-        }
+        OutputState { outputs }
     }
 }
 
@@ -82,7 +81,6 @@ mod tests {
 
         let expected = OutputState {
             outputs: expected_outputs,
-            tick: Tick { major: true },
         };
 
         assert_eq!(expected, result);
@@ -99,7 +97,6 @@ mod tests {
         expected_states.push(State::On).unwrap();
         let expected = OutputState {
             outputs: expected_states,
-            tick: Tick { major: false },
         };
 
         assert_eq!(expected, result);

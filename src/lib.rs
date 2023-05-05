@@ -15,7 +15,6 @@ pub use rate::Rate;
 #[derive(Debug, PartialEq)]
 pub struct OutputState {
     pub outputs: Vec<State, 4>,
-    pub tick: Tick,
 }
 
 #[derive(Debug, PartialEq)]
