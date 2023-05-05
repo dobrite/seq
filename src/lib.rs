@@ -13,12 +13,12 @@ pub use pwm::Pwm;
 pub use rate::Rate;
 
 #[derive(Debug, PartialEq)]
-pub struct OutputState<'a> {
+pub struct OutputState {
     pub outputs: Vec<State, 4>,
-    pub tick: &'a Tick,
+    pub tick: Tick,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct Tick {
-    count: u32,
+    pub major: bool,
 }

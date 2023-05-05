@@ -3,9 +3,9 @@ use crate::{Output, OutputState, Pwm, Rate, Tick};
 use heapless::Vec;
 
 pub struct Outputs {
+    count: u32,
     outputs: Vec<Output, 4>,
     resolution: u32,
-    tick: Tick,
 }
 
 impl Default for Outputs {
@@ -25,9 +25,9 @@ impl Outputs {
         };
 
         Self {
+            count: 1,
             outputs,
             resolution,
-            tick: Tick { count: 1 },
         }
     }
 
@@ -36,10 +36,10 @@ impl Outputs {
             o.update();
         }
 
-        if self.tick.count == self.resolution {
-            self.tick.count = 1;
+        if self.count == self.resolution {
+            self.count = 1;
         } else {
-            self.tick.count += 1;
+            self.count += 1;
         }
     }
 
@@ -56,7 +56,9 @@ impl Outputs {
 
         OutputState {
             outputs,
-            tick: &self.tick,
+            tick: Tick {
+                major: self.count == 1,
+            },
         }
     }
 }
@@ -80,7 +82,7 @@ mod tests {
 
         let expected = OutputState {
             outputs: expected_outputs,
-            tick: &Tick { count: 1 },
+            tick: Tick { major: true },
         };
 
         assert_eq!(expected, result);
@@ -97,7 +99,7 @@ mod tests {
         expected_states.push(State::On).unwrap();
         let expected = OutputState {
             outputs: expected_states,
-            tick: &Tick { count: 2 },
+            tick: Tick { major: false },
         };
 
         assert_eq!(expected, result);
