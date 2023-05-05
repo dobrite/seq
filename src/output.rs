@@ -1,4 +1,7 @@
 use crate::{Pwm, Rand, Rate};
+use oorandom::Rand32;
+
+const RNG_SEED: u64 = 0;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum State {
@@ -15,6 +18,7 @@ pub struct Output {
     rand: Rand,
     rate: Rate,
     resolution: u32,
+    rng: Rand32,
     pub state: State,
 }
 
@@ -36,6 +40,7 @@ impl Output {
             rand,
             rate,
             resolution,
+            rng: Rand32::new(RNG_SEED),
             state: State::On,
         };
 
@@ -105,6 +110,7 @@ mod tests {
             rand,
             rate,
             resolution: 1_920,
+            rng: Rand32::new(RNG_SEED),
             state: State::On,
         };
 
@@ -126,6 +132,7 @@ mod tests {
             rand,
             rate,
             resolution: 1_920,
+            rng: Rand32::new(RNG_SEED),
             state: State::On,
         };
 
@@ -147,6 +154,7 @@ mod tests {
             rand,
             rate,
             resolution: 4,
+            rng: Rand32::new(RNG_SEED),
             state: State::On,
         };
 
@@ -162,6 +170,7 @@ mod tests {
             rand,
             rate,
             resolution: 4,
+            rng: Rand32::new(RNG_SEED),
             state: State::On,
         };
 
@@ -177,6 +186,7 @@ mod tests {
             rand,
             rate,
             resolution: 4,
+            rng: Rand32::new(RNG_SEED),
             state: State::Off,
         };
 
@@ -192,6 +202,7 @@ mod tests {
             rand,
             rate,
             resolution: 4,
+            rng: Rand32::new(RNG_SEED),
             state: State::Off,
         };
 
@@ -207,6 +218,7 @@ mod tests {
             rand: Rand::R100,
             rate: Rate::Unity,
             resolution: 4,
+            rng: Rand32::new(RNG_SEED),
             state: State::On,
         };
 
@@ -228,6 +240,7 @@ mod tests {
             rand,
             rate,
             resolution: 4,
+            rng: Rand32::new(RNG_SEED),
             state: State::Off,
         };
 
