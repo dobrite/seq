@@ -9,6 +9,7 @@ pub enum State {
 #[derive(Debug, PartialEq)]
 pub struct Output {
     count: u32,
+    cycle_target: u32,
     off_target: u32,
     pwm: Pwm,
     rate: Rate,
@@ -28,6 +29,7 @@ impl Output {
 
         let mut output = Self {
             count: 1,
+            cycle_target: 0,
             off_target: 0,
             pwm,
             rate,
@@ -35,14 +37,19 @@ impl Output {
             state: State::On,
         };
 
+        output.calc_cycle_target();
         output.calc_off_target();
 
         output
     }
 
+    fn calc_cycle_target(&mut self) {
+        self.cycle_target = self.resolution;
+    }
+
     fn calc_off_target(&mut self) {
         let ratio: f32 = self.pwm.into();
-        self.off_target = (ratio * self.resolution as f32) as u32
+        self.off_target = (ratio * self.cycle_target as f32) as u32
     }
 
     pub fn set_pwm(&mut self, pwm: Pwm) {
@@ -51,7 +58,7 @@ impl Output {
     }
 
     pub fn update(&mut self) {
-        if self.count == self.resolution {
+        if self.count == self.cycle_target {
             self.count = 1;
         } else {
             self.count += 1;
@@ -75,6 +82,7 @@ mod tests {
 
         let expected = Output {
             count: 1,
+            cycle_target: 1_920,
             off_target: 960,
             pwm: Pwm::P50,
             rate: Rate::Unity,
@@ -91,6 +99,7 @@ mod tests {
         output.update();
 
         let expected = Output {
+            cycle_target: 1_920,
             count: 2,
             off_target: 960,
             pwm: Pwm::P50,
@@ -108,6 +117,7 @@ mod tests {
 
         let mut expected = Output {
             count: 1,
+            cycle_target: 4,
             off_target: 2,
             pwm: Pwm::P50,
             rate: Rate::Unity,
@@ -121,6 +131,7 @@ mod tests {
 
         expected = Output {
             count: 2,
+            cycle_target: 4,
             off_target: 2,
             pwm: Pwm::P50,
             rate: Rate::Unity,
@@ -134,6 +145,7 @@ mod tests {
 
         expected = Output {
             count: 3,
+            cycle_target: 4,
             off_target: 2,
             pwm: Pwm::P50,
             rate: Rate::Unity,
@@ -147,6 +159,7 @@ mod tests {
 
         expected = Output {
             count: 4,
+            cycle_target: 4,
             off_target: 2,
             pwm: Pwm::P50,
             rate: Rate::Unity,
@@ -160,6 +173,7 @@ mod tests {
 
         expected = Output {
             count: 1,
+            cycle_target: 4,
             off_target: 2,
             pwm: Pwm::P50,
             rate: Rate::Unity,
