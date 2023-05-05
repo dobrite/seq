@@ -9,11 +9,11 @@ pub enum State {
 #[derive(Debug, PartialEq)]
 pub struct Output {
     count: u32,
+    off_target: u32,
     pwm: Pwm,
     rate: Rate,
     resolution: u32,
     pub state: State,
-    target: u32,
 }
 
 impl Default for Output {
@@ -28,26 +28,26 @@ impl Output {
 
         let mut output = Self {
             count: 1,
+            off_target: 0,
             pwm,
             rate,
             resolution,
             state: State::On,
-            target: 0,
         };
 
-        output.calc_target();
+        output.calc_off_target();
 
         output
     }
 
-    pub fn calc_target(&mut self) {
+    pub fn calc_off_target(&mut self) {
         let ratio: f32 = self.pwm.into();
-        self.target = (ratio * self.resolution as f32) as u32
+        self.off_target = (ratio * self.resolution as f32) as u32
     }
 
     pub fn set_pwm(&mut self, pwm: Pwm) {
         self.pwm = pwm;
-        self.calc_target();
+        self.calc_off_target();
     }
 
     pub fn update(&mut self) {
@@ -57,7 +57,7 @@ impl Output {
             self.count += 1;
         }
 
-        if self.count <= self.target {
+        if self.count <= self.off_target {
             self.state = State::On
         } else {
             self.state = State::Off
@@ -75,11 +75,11 @@ mod tests {
 
         let expected = Output {
             count: 1,
+            off_target: 960,
             pwm: Pwm::P50,
             rate: Rate::Unity,
             resolution: 1_920,
             state: State::On,
-            target: 960,
         };
 
         assert_eq!(expected, output);
@@ -92,11 +92,11 @@ mod tests {
 
         let expected = Output {
             count: 2,
+            off_target: 960,
             pwm: Pwm::P50,
             rate: Rate::Unity,
             resolution: 1_920,
             state: State::On,
-            target: 960,
         };
 
         assert_eq!(expected, output);
@@ -108,11 +108,11 @@ mod tests {
 
         let mut expected = Output {
             count: 1,
+            off_target: 2,
             pwm: Pwm::P50,
             rate: Rate::Unity,
             resolution: 4,
             state: State::On,
-            target: 2,
         };
 
         assert_eq!(expected, output);
@@ -121,11 +121,11 @@ mod tests {
 
         expected = Output {
             count: 2,
+            off_target: 2,
             pwm: Pwm::P50,
             rate: Rate::Unity,
             resolution: 4,
             state: State::On,
-            target: 2,
         };
 
         assert_eq!(expected, output);
@@ -134,11 +134,11 @@ mod tests {
 
         expected = Output {
             count: 3,
+            off_target: 2,
             pwm: Pwm::P50,
             rate: Rate::Unity,
             resolution: 4,
             state: State::Off,
-            target: 2,
         };
 
         assert_eq!(expected, output);
@@ -147,11 +147,11 @@ mod tests {
 
         expected = Output {
             count: 4,
+            off_target: 2,
             pwm: Pwm::P50,
             rate: Rate::Unity,
             resolution: 4,
             state: State::Off,
-            target: 2,
         };
 
         assert_eq!(expected, output);
@@ -160,11 +160,11 @@ mod tests {
 
         expected = Output {
             count: 1,
+            off_target: 2,
             pwm: Pwm::P50,
             rate: Rate::Unity,
             resolution: 4,
             state: State::On,
-            target: 2,
         };
 
         assert_eq!(expected, output);
