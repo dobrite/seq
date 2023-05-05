@@ -40,7 +40,7 @@ impl Output {
         output
     }
 
-    pub fn calc_off_target(&mut self) {
+    fn calc_off_target(&mut self) {
         let ratio: f32 = self.pwm.into();
         self.off_target = (ratio * self.resolution as f32) as u32
     }
