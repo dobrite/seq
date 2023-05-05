@@ -1,13 +1,14 @@
 use crate::Output;
 use crate::OutputState;
 use crate::Pwm;
+use crate::Tick;
 
 use heapless::Vec;
 
 pub struct Outputs {
-    count: u32,
     outputs: Vec<Output, 4>,
     resolution: u32,
+    tick: Tick,
 }
 
 impl Default for Outputs {
@@ -27,9 +28,9 @@ impl Outputs {
         };
 
         Self {
-            count: 1,
             outputs,
             resolution,
+            tick: Tick { count: 1 },
         }
     }
 
@@ -38,10 +39,10 @@ impl Outputs {
             o.update();
         }
 
-        if self.count == self.resolution {
-            self.count = 1;
+        if self.tick.count == self.resolution {
+            self.tick.count = 1;
         } else {
-            self.count += 1;
+            self.tick.count += 1;
         }
     }
 
@@ -54,7 +55,7 @@ impl Outputs {
 
         OutputState {
             outputs,
-            count: self.count,
+            tick: &self.tick,
         }
     }
 }
@@ -66,7 +67,8 @@ mod tests {
 
     #[test]
     fn it_new() {
-        let outputs = Outputs::new(4, 24);
+        let resolution = 24;
+        let outputs = Outputs::new(4, resolution);
         let result = outputs.state();
 
         let mut expected_outputs = Vec::new();
@@ -77,7 +79,7 @@ mod tests {
 
         let expected = OutputState {
             outputs: expected_outputs,
-            count: 1,
+            tick: &Tick { count: 1 },
         };
 
         assert_eq!(expected, result);
@@ -85,7 +87,8 @@ mod tests {
 
     #[test]
     fn it_updates() {
-        let mut outputs = Outputs::new(1, 24);
+        let resolution = 24;
+        let mut outputs = Outputs::new(1, resolution);
         outputs.update();
         let result = outputs.state();
 
@@ -93,7 +96,7 @@ mod tests {
         expected_states.push(State::On).unwrap();
         let expected = OutputState {
             outputs: expected_states,
-            count: 2,
+            tick: &Tick { count: 2 },
         };
 
         assert_eq!(expected, result);

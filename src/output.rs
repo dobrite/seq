@@ -24,27 +24,31 @@ impl Default for Output {
 }
 
 impl Output {
-    pub fn calc_target(pwm: Pwm, resolution: u32) -> u32 {
-        let ratio: f32 = pwm.into();
-        (ratio * resolution as f32) as u32
-    }
-
     pub fn new(resolution: u32) -> Self {
         let pwm = Pwm::P50;
 
-        Self {
+        let mut output = Self {
             count: 1,
             pwm,
             rate: Rate::Unity,
             resolution,
             state: State::On,
-            target: Self::calc_target(pwm, resolution),
-        }
+            target: 0,
+        };
+
+        output.calc_target();
+
+        output
+    }
+
+    pub fn calc_target(&mut self) {
+        let ratio: f32 = self.pwm.into();
+        self.target = (ratio * self.resolution as f32) as u32
     }
 
     pub fn set_pwm(&mut self, pwm: Pwm) {
         self.pwm = pwm;
-        self.target = Self::calc_target(self.pwm, self.resolution);
+        self.calc_target();
     }
 
     pub fn update(&mut self) {
