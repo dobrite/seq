@@ -1,8 +1,4 @@
-use crate::Output;
-use crate::OutputState;
-use crate::Pwm;
-use crate::Rate;
-use crate::Tick;
+use crate::{Output, OutputState, Pwm, Rate, Tick};
 
 use heapless::Vec;
 

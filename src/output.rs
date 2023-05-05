@@ -1,5 +1,4 @@
-use crate::Pwm;
-use crate::Rate;
+use crate::{Pwm, Rate};
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum State {
