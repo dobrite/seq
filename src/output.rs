@@ -20,12 +20,12 @@ pub struct Output {
 
 impl Default for Output {
     fn default() -> Self {
-        Self::new(1_920, Rate::Unity)
+        Self::new(1_920, Rand::R100, Rate::Unity)
     }
 }
 
 impl Output {
-    pub fn new(resolution: u32, rate: Rate) -> Self {
+    pub fn new(resolution: u32, rand: Rand, rate: Rate) -> Self {
         let pwm = Pwm::P50;
 
         let mut output = Self {
@@ -33,7 +33,7 @@ impl Output {
             cycle_target: 0,
             off_target: 0,
             pwm,
-            rand: Rand::R100,
+            rand,
             rate,
             resolution,
             state: State::On,
@@ -93,15 +93,17 @@ mod tests {
 
     #[test]
     fn it_new() {
-        let output = Output::new(1_920, Rate::Unity);
+        let rand = Rand::R100;
+        let rate = Rate::Unity;
+        let output = Output::new(1_920, rand, rate);
 
         let expected = Output {
             count: 1,
             cycle_target: 1_920,
             off_target: 960,
             pwm: Pwm::P50,
-            rand: Rand::R100,
-            rate: Rate::Unity,
+            rand,
+            rate,
             resolution: 1_920,
             state: State::On,
         };
@@ -111,7 +113,9 @@ mod tests {
 
     #[test]
     fn it_updates() {
-        let mut output = Output::new(1_920, Rate::Unity);
+        let rand = Rand::R100;
+        let rate = Rate::Unity;
+        let mut output = Output::new(1_920, rand, rate);
         output.tick();
 
         let expected = Output {
@@ -119,8 +123,8 @@ mod tests {
             count: 2,
             off_target: 960,
             pwm: Pwm::P50,
-            rand: Rand::R100,
-            rate: Rate::Unity,
+            rand,
+            rate,
             resolution: 1_920,
             state: State::On,
         };
@@ -129,16 +133,19 @@ mod tests {
     }
 
     #[test]
+
     fn it_updates_through_a_full_cycle() {
-        let mut output = Output::new(4, Rate::Unity);
+        let rand = Rand::R100;
+        let rate = Rate::Unity;
+        let mut output = Output::new(4, rand, rate);
 
         let mut expected = Output {
             count: 1,
             cycle_target: 4,
             off_target: 2,
             pwm: Pwm::P50,
-            rand: Rand::R100,
-            rate: Rate::Unity,
+            rand,
+            rate,
             resolution: 4,
             state: State::On,
         };
@@ -152,8 +159,8 @@ mod tests {
             cycle_target: 4,
             off_target: 2,
             pwm: Pwm::P50,
-            rand: Rand::R100,
-            rate: Rate::Unity,
+            rand,
+            rate,
             resolution: 4,
             state: State::On,
         };
@@ -167,8 +174,8 @@ mod tests {
             cycle_target: 4,
             off_target: 2,
             pwm: Pwm::P50,
-            rand: Rand::R100,
-            rate: Rate::Unity,
+            rand,
+            rate,
             resolution: 4,
             state: State::Off,
         };
@@ -182,8 +189,8 @@ mod tests {
             cycle_target: 4,
             off_target: 2,
             pwm: Pwm::P50,
-            rand: Rand::R100,
-            rate: Rate::Unity,
+            rand,
+            rate,
             resolution: 4,
             state: State::Off,
         };
@@ -208,8 +215,9 @@ mod tests {
 
     #[test]
     fn it_ticks_at_twice_the_rate_with_rate_times_2() {
+        let rand = Rand::R100;
         let rate = Rate::Mult(2);
-        let mut output = Output::new(4, rate);
+        let mut output = Output::new(4, rand, rate);
         output.tick();
 
         let expected = Output {
@@ -217,7 +225,7 @@ mod tests {
             cycle_target: 2,
             off_target: 1,
             pwm: Pwm::P50,
-            rand: Rand::R100,
+            rand,
             rate,
             resolution: 4,
             state: State::Off,
