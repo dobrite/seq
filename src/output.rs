@@ -46,9 +46,14 @@ impl Output {
             state: State::On,
         };
 
-        output.calc();
+        output.calc_targets();
 
         output
+    }
+
+    fn calc_targets(&mut self) {
+        self.calc_cycle_target();
+        self.calc_off_target();
     }
 
     fn calc_cycle_target(&mut self) {
@@ -59,11 +64,6 @@ impl Output {
         } as u32
     }
 
-    fn calc(&mut self) {
-        self.calc_cycle_target();
-        self.calc_off_target();
-    }
-
     fn calc_off_target(&mut self) {
         let ratio: f32 = self.pwm.into();
         self.off_target = (ratio * self.cycle_target as f32) as u32
@@ -71,12 +71,12 @@ impl Output {
 
     pub fn set_pwm(&mut self, pwm: Pwm) {
         self.pwm = pwm;
-        self.calc();
+        self.calc_targets();
     }
 
     pub fn set_rate(&mut self, rate: Rate) {
         self.rate = rate;
-        self.calc();
+        self.calc_targets();
     }
 
     pub fn tick(&mut self) {
