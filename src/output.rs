@@ -37,14 +37,22 @@ impl Output {
             state: State::On,
         };
 
-        output.calc_cycle_target();
-        output.calc_off_target();
+        output.calc();
 
         output
     }
 
     fn calc_cycle_target(&mut self) {
-        self.cycle_target = self.resolution;
+        self.cycle_target = match self.rate {
+            Rate::Div(div) => div as f32 * self.resolution as f32,
+            Rate::Unity => self.resolution as f32,
+            Rate::Mult(mult) => (1.0 / mult as f32) * self.resolution as f32,
+        } as u32
+    }
+
+    fn calc(&mut self) {
+        self.calc_cycle_target();
+        self.calc_off_target();
     }
 
     fn calc_off_target(&mut self) {
@@ -54,7 +62,12 @@ impl Output {
 
     pub fn set_pwm(&mut self, pwm: Pwm) {
         self.pwm = pwm;
-        self.calc_off_target();
+        self.calc();
+    }
+
+    pub fn set_rate(&mut self, rate: Rate) {
+        self.rate = rate;
+        self.calc();
     }
 
     pub fn update(&mut self) {
@@ -179,6 +192,25 @@ mod tests {
             rate: Rate::Unity,
             resolution: 4,
             state: State::On,
+        };
+
+        assert_eq!(expected, output);
+    }
+
+    #[test]
+    fn it_ticks_at_twice_the_rate_with_rate_times_2() {
+        let rate = Rate::Mult(2);
+        let mut output = Output::new(4, rate);
+        output.update();
+
+        let expected = Output {
+            count: 2,
+            cycle_target: 2,
+            off_target: 1,
+            pwm: Pwm::P50,
+            rate,
+            resolution: 4,
+            state: State::Off,
         };
 
         assert_eq!(expected, output);

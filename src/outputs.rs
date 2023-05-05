@@ -47,6 +47,10 @@ impl Outputs {
         self.outputs[index].set_pwm(pwm);
     }
 
+    pub fn set_rate(&mut self, index: usize, rate: Rate) {
+        self.outputs[index].set_rate(rate);
+    }
+
     pub fn state(&self) -> OutputState {
         let outputs = self.outputs.iter().map(|o| o.state).collect();
 
