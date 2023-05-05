@@ -1,22 +1,16 @@
 use crate::{rng::Rng, Prob, Pwm, Rate};
 
-#[derive(Copy, Clone, Debug, PartialEq)]
-pub enum State {
-    On,
-    Off,
-}
-
 #[derive(Debug, PartialEq)]
 pub struct Output {
     count: u32,
     cycle_target: u32,
     off_target: u32,
+    pub(crate) on: bool,
     pwm: Pwm,
     rate: Rate,
     resolution: u32,
     rng: Rng,
     skip_cycle: bool,
-    pub state: State,
 }
 
 impl Default for Output {
@@ -33,12 +27,12 @@ impl Output {
             count: 1,
             cycle_target: 0,
             off_target: 0,
+            on: true,
             pwm,
             rate,
             resolution,
             rng: Rng::new(prob),
             skip_cycle: false,
-            state: State::On,
         };
 
         output.calc_targets();
@@ -71,11 +65,7 @@ impl Output {
     }
 
     fn calc_initial_state(&mut self) {
-        self.state = if self.skip_cycle {
-            State::Off
-        } else {
-            State::On
-        };
+        self.on = !self.skip_cycle
     }
 
     pub fn set_prob(&mut self, prob: Prob) {
@@ -103,14 +93,14 @@ impl Output {
         }
 
         if self.skip_cycle {
-            self.state = State::Off;
+            self.on = false;
             return;
         }
 
         if self.count <= self.off_target {
-            self.state = State::On
+            self.on = true
         } else {
-            self.state = State::Off
+            self.on = false
         }
     }
 }
@@ -129,12 +119,12 @@ mod tests {
             count: 1,
             cycle_target: 1_920,
             off_target: 960,
+            on: true,
             pwm: Pwm::P50,
             rate,
             resolution: 1_920,
             rng: Rng::new(prob),
             skip_cycle: false,
-            state: State::On,
         };
 
         assert_eq!(expected, output);
@@ -146,10 +136,9 @@ mod tests {
         output.tick();
 
         let expected_count = 2;
-        let expected_state = State::On;
 
         assert_eq!(expected_count, output.count);
-        assert_eq!(expected_state, output.state);
+        assert!(output.on);
     }
 
     #[test]
@@ -158,27 +147,27 @@ mod tests {
         let mut output = Output::new(4, Prob::P100, Rate::Unity);
 
         assert_eq!(1, output.count);
-        assert_eq!(State::On, output.state);
+        assert!(output.on);
 
         output.tick();
 
         assert_eq!(2, output.count);
-        assert_eq!(State::On, output.state);
+        assert!(output.on);
 
         output.tick();
 
         assert_eq!(3, output.count);
-        assert_eq!(State::Off, output.state);
+        assert!(!output.on);
 
         output.tick();
 
         assert_eq!(4, output.count);
-        assert_eq!(State::Off, output.state);
+        assert!(!output.on);
 
         output.tick();
 
         assert_eq!(1, output.count);
-        assert_eq!(State::On, output.state);
+        assert!(output.on);
     }
 
     #[test]
@@ -191,12 +180,12 @@ mod tests {
         assert_eq!(2, output.cycle_target);
         assert_eq!(1, output.off_target);
         assert_eq!(rate, output.rate);
-        assert_eq!(State::On, output.state);
+        assert!(output.on);
 
         output.tick();
 
         assert_eq!(2, output.count);
-        assert_eq!(State::Off, output.state);
+        assert!(!output.on);
     }
 
     #[test]
@@ -205,13 +194,13 @@ mod tests {
         let rate = Rate::Unity;
         let mut output = Output::new(4, prob, rate);
 
-        assert_eq!(State::Off, output.state);
+        assert!(!output.on);
         output.tick();
-        assert_eq!(State::Off, output.state);
+        assert!(!output.on);
         output.tick();
-        assert_eq!(State::Off, output.state);
+        assert!(!output.on);
         output.tick();
-        assert_eq!(State::Off, output.state);
+        assert!(!output.on);
         output.tick();
     }
 }

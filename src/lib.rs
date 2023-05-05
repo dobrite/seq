@@ -9,7 +9,6 @@ mod pwm;
 mod rate;
 mod rng;
 
-pub use output::State;
 pub use outputs::Outputs;
 pub use prob::Prob;
 pub use pwm::Pwm;
@@ -17,7 +16,7 @@ pub use rate::Rate;
 
 #[derive(Debug, PartialEq)]
 pub struct OutputState {
-    pub outputs: Vec<State, 4>,
+    pub outputs: Vec<bool, 4>,
 }
 
 #[derive(Debug, PartialEq)]

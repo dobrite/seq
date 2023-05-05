@@ -61,7 +61,7 @@ impl Outputs {
     }
 
     pub fn state(&self) -> OutputState {
-        let outputs = self.outputs.iter().map(|o| o.state).collect();
+        let outputs = self.outputs.iter().map(|o| o.on).collect();
 
         OutputState { outputs }
     }
@@ -70,7 +70,6 @@ impl Outputs {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::State;
 
     #[test]
     fn it_new() {
@@ -79,10 +78,10 @@ mod tests {
         let result = outputs.state();
 
         let mut expected_outputs = Vec::new();
-        expected_outputs.push(State::On).unwrap();
-        expected_outputs.push(State::On).unwrap();
-        expected_outputs.push(State::On).unwrap();
-        expected_outputs.push(State::On).unwrap();
+        expected_outputs.push(true).unwrap();
+        expected_outputs.push(true).unwrap();
+        expected_outputs.push(true).unwrap();
+        expected_outputs.push(true).unwrap();
 
         let expected = OutputState {
             outputs: expected_outputs,
@@ -99,7 +98,7 @@ mod tests {
         let result = outputs.state();
 
         let mut expected_states = Vec::new();
-        expected_states.push(State::On).unwrap();
+        expected_states.push(true).unwrap();
         let expected = OutputState {
             outputs: expected_states,
         };
