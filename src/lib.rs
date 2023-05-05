@@ -7,6 +7,7 @@ mod outputs;
 mod prob;
 mod pwm;
 mod rate;
+mod rng;
 
 pub use output::{Output, State};
 pub use outputs::Outputs;

@@ -1,7 +1,4 @@
-use crate::{Prob, Pwm, Rate};
-use oorandom::Rand32;
-
-const RNG_SEED: u64 = 0;
+use crate::{rng::Rng, Prob, Pwm, Rate};
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum State {
@@ -14,11 +11,10 @@ pub struct Output {
     count: u32,
     cycle_target: u32,
     off_target: u32,
-    prob: Prob,
     pwm: Pwm,
     rate: Rate,
     resolution: u32,
-    rng: Rand32,
+    rng: Rng,
     skip_cycle: bool,
     pub state: State,
 }
@@ -37,11 +33,10 @@ impl Output {
             count: 1,
             cycle_target: 0,
             off_target: 0,
-            prob,
             pwm,
             rate,
             resolution,
-            rng: Rand32::new(RNG_SEED),
+            rng: Rng::new(prob),
             skip_cycle: false,
             state: State::On,
         };
@@ -108,11 +103,10 @@ mod tests {
             count: 1,
             cycle_target: 1_920,
             off_target: 960,
-            prob,
             pwm: Pwm::P50,
             rate,
             resolution: 1_920,
-            rng: Rand32::new(RNG_SEED),
+            rng: Rng::new(prob),
             skip_cycle: false,
             state: State::On,
         };
