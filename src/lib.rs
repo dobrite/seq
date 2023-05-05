@@ -4,14 +4,14 @@ use heapless::Vec;
 
 mod output;
 mod outputs;
+mod prob;
 mod pwm;
-mod rand;
 mod rate;
 
 pub use output::{Output, State};
 pub use outputs::Outputs;
+pub use prob::Prob;
 pub use pwm::Pwm;
-pub use rand::Rand;
 pub use rate::Rate;
 
 #[derive(Debug, PartialEq)]

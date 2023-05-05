@@ -1,4 +1,4 @@
-use crate::{Pwm, Rand, Rate};
+use crate::{Prob, Pwm, Rate};
 use oorandom::Rand32;
 
 const RNG_SEED: u64 = 0;
@@ -14,8 +14,8 @@ pub struct Output {
     count: u32,
     cycle_target: u32,
     off_target: u32,
+    prob: Prob,
     pwm: Pwm,
-    rand: Rand,
     rate: Rate,
     resolution: u32,
     rng: Rand32,
@@ -24,20 +24,20 @@ pub struct Output {
 
 impl Default for Output {
     fn default() -> Self {
-        Self::new(1_920, Rand::R100, Rate::Unity)
+        Self::new(1_920, Prob::P100, Rate::Unity)
     }
 }
 
 impl Output {
-    pub fn new(resolution: u32, rand: Rand, rate: Rate) -> Self {
+    pub fn new(resolution: u32, prob: Prob, rate: Rate) -> Self {
         let pwm = Pwm::P50;
 
         let mut output = Self {
             count: 1,
             cycle_target: 0,
             off_target: 0,
+            prob,
             pwm,
-            rand,
             rate,
             resolution,
             rng: Rand32::new(RNG_SEED),
@@ -98,16 +98,16 @@ mod tests {
 
     #[test]
     fn it_new() {
-        let rand = Rand::R100;
+        let prob = Prob::P100;
         let rate = Rate::Unity;
-        let output = Output::new(1_920, rand, rate);
+        let output = Output::new(1_920, prob, rate);
 
         let expected = Output {
             count: 1,
             cycle_target: 1_920,
             off_target: 960,
+            prob,
             pwm: Pwm::P50,
-            rand,
             rate,
             resolution: 1_920,
             rng: Rand32::new(RNG_SEED),
@@ -119,17 +119,17 @@ mod tests {
 
     #[test]
     fn it_updates() {
-        let rand = Rand::R100;
+        let prob = Prob::P100;
         let rate = Rate::Unity;
-        let mut output = Output::new(1_920, rand, rate);
+        let mut output = Output::new(1_920, prob, rate);
         output.tick();
 
         let expected = Output {
             cycle_target: 1_920,
             count: 2,
             off_target: 960,
+            prob,
             pwm: Pwm::P50,
-            rand,
             rate,
             resolution: 1_920,
             rng: Rand32::new(RNG_SEED),
@@ -142,16 +142,16 @@ mod tests {
     #[test]
 
     fn it_updates_through_a_full_cycle() {
-        let rand = Rand::R100;
+        let prob = Prob::P100;
         let rate = Rate::Unity;
-        let mut output = Output::new(4, rand, rate);
+        let mut output = Output::new(4, prob, rate);
 
         let mut expected = Output {
             count: 1,
             cycle_target: 4,
             off_target: 2,
+            prob,
             pwm: Pwm::P50,
-            rand,
             rate,
             resolution: 4,
             rng: Rand32::new(RNG_SEED),
@@ -166,8 +166,8 @@ mod tests {
             count: 2,
             cycle_target: 4,
             off_target: 2,
+            prob,
             pwm: Pwm::P50,
-            rand,
             rate,
             resolution: 4,
             rng: Rand32::new(RNG_SEED),
@@ -182,8 +182,8 @@ mod tests {
             count: 3,
             cycle_target: 4,
             off_target: 2,
+            prob,
             pwm: Pwm::P50,
-            rand,
             rate,
             resolution: 4,
             rng: Rand32::new(RNG_SEED),
@@ -198,8 +198,8 @@ mod tests {
             count: 4,
             cycle_target: 4,
             off_target: 2,
+            prob,
             pwm: Pwm::P50,
-            rand,
             rate,
             resolution: 4,
             rng: Rand32::new(RNG_SEED),
@@ -214,8 +214,8 @@ mod tests {
             count: 1,
             cycle_target: 4,
             off_target: 2,
+            prob,
             pwm: Pwm::P50,
-            rand: Rand::R100,
             rate: Rate::Unity,
             resolution: 4,
             rng: Rand32::new(RNG_SEED),
@@ -227,17 +227,17 @@ mod tests {
 
     #[test]
     fn it_ticks_at_twice_the_rate_with_rate_times_2() {
-        let rand = Rand::R100;
+        let prob = Prob::P100;
         let rate = Rate::Mult(2);
-        let mut output = Output::new(4, rand, rate);
+        let mut output = Output::new(4, prob, rate);
         output.tick();
 
         let expected = Output {
             count: 2,
             cycle_target: 2,
             off_target: 1,
+            prob,
             pwm: Pwm::P50,
-            rand,
             rate,
             resolution: 4,
             rng: Rand32::new(RNG_SEED),

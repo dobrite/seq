@@ -1,4 +1,4 @@
-use crate::{Output, OutputState, Pwm, Rand, Rate, Tick};
+use crate::{Output, OutputState, Prob, Pwm, Rate, Tick};
 
 use heapless::Vec;
 
@@ -19,7 +19,7 @@ impl Outputs {
         let outputs = {
             let mut o = Vec::new();
             for _ in 0..num {
-                o.push(Output::new(resolution, Rand::R100, Rate::Unity))
+                o.push(Output::new(resolution, Prob::P100, Rate::Unity))
                     .ok();
             }
             o
