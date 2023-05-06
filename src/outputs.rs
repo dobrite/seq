@@ -1,6 +1,6 @@
-use crate::{output::Output, OutputState, Prob, Pwm, Rate, Tick};
-
 use heapless::Vec;
+
+use crate::{output::Output, OutputState, Prob, Pwm, Rate, Tick};
 
 pub struct Outputs {
     count: u32,
