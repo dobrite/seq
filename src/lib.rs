@@ -2,17 +2,17 @@
 
 use heapless::Vec;
 
+pub use outputs::Outputs;
+pub use prob::Prob;
+pub use pwm::Pwm;
+pub use rate::Rate;
+
 mod output;
 mod outputs;
 mod prob;
 mod pwm;
 mod rate;
 mod rng;
-
-pub use outputs::Outputs;
-pub use prob::Prob;
-pub use pwm::Pwm;
-pub use rate::Rate;
 
 #[derive(Debug, PartialEq)]
 pub struct OutputState {
