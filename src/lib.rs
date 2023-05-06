@@ -18,8 +18,3 @@ mod rng;
 pub struct OutputState {
     pub outputs: Vec<bool, 4>,
 }
-
-#[derive(Debug, PartialEq)]
-pub struct Tick {
-    pub major: bool,
-}

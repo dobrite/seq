@@ -1,6 +1,6 @@
 use heapless::Vec;
 
-use crate::{output::Output, OutputState, Prob, Pwm, Rate, Tick};
+use crate::{output::Output, OutputState, Prob, Pwm, Rate};
 
 pub struct Outputs {
     count: u32,
@@ -32,7 +32,7 @@ impl Outputs {
         }
     }
 
-    pub fn tick(&mut self) -> Tick {
+    pub fn tick(&mut self) -> OutputState {
         for o in self.outputs.iter_mut() {
             o.tick();
         }
@@ -43,9 +43,7 @@ impl Outputs {
             self.count += 1;
         }
 
-        Tick {
-            major: self.count == 1,
-        }
+        self.state()
     }
 
     pub fn set_prob(&mut self, index: usize, prob: Prob) {
@@ -60,7 +58,7 @@ impl Outputs {
         self.outputs[index].set_rate(rate);
     }
 
-    pub fn state(&self) -> OutputState {
+    fn state(&self) -> OutputState {
         let outputs = self.outputs.iter().map(|o| o.on).collect();
 
         OutputState { outputs }
