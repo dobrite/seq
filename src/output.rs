@@ -278,4 +278,13 @@ mod tests {
         output.tick(7_680);
         assert_eq!(OFF, output.on);
     }
+
+    #[test]
+    fn it_works_with_pwm_pew() {
+        let rate = Rate::Unity;
+        let pwm = Pwm::Pew;
+        let prob = Prob::P10;
+        let mut output = Output::new(1_920, rate, pwm, prob);
+        output.tick(1);
+    }
 }

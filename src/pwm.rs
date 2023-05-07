@@ -15,7 +15,7 @@ pub enum Pwm {
 impl From<Pwm> for f32 {
     fn from(val: Pwm) -> Self {
         match val {
-            Pwm::Pew => 0.0,
+            Pwm::Pew => 0.1,
             Pwm::P10 => 0.1,
             Pwm::P20 => 0.2,
             Pwm::P30 => 0.3,
