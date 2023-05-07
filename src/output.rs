@@ -84,7 +84,7 @@ impl Output {
         self.calc_targets();
     }
 
-    pub fn tick(&mut self) {
+    pub fn tick(&mut self, _count: u32) {
         if self.count == self.cycle_target {
             self.count = 1;
             self.calc_skip_cycle();
@@ -133,7 +133,7 @@ mod tests {
     #[test]
     fn it_updates() {
         let mut output = Output::new(1_920, Prob::P100, Rate::Unity);
-        output.tick();
+        output.tick(1);
 
         let expected_count = 2;
 
@@ -149,22 +149,22 @@ mod tests {
         assert_eq!(1, output.count);
         assert!(output.on);
 
-        output.tick();
+        output.tick(1);
 
         assert_eq!(2, output.count);
         assert!(output.on);
 
-        output.tick();
+        output.tick(2);
 
         assert_eq!(3, output.count);
         assert!(!output.on);
 
-        output.tick();
+        output.tick(3);
 
         assert_eq!(4, output.count);
         assert!(!output.on);
 
-        output.tick();
+        output.tick(4);
 
         assert_eq!(1, output.count);
         assert!(output.on);
@@ -182,7 +182,7 @@ mod tests {
         assert_eq!(rate, output.rate);
         assert!(output.on);
 
-        output.tick();
+        output.tick(1);
 
         assert_eq!(2, output.count);
         assert!(!output.on);
@@ -195,12 +195,12 @@ mod tests {
         let mut output = Output::new(4, prob, rate);
 
         assert!(!output.on);
-        output.tick();
+        output.tick(1);
         assert!(!output.on);
-        output.tick();
+        output.tick(2);
         assert!(!output.on);
-        output.tick();
+        output.tick(3);
         assert!(!output.on);
-        output.tick();
+        output.tick(4);
     }
 }

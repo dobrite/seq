@@ -34,14 +34,10 @@ impl Outputs {
 
     pub fn tick(&mut self) -> OutputState {
         for o in self.outputs.iter_mut() {
-            o.tick();
+            o.tick(self.count);
         }
 
-        if self.count == self.resolution {
-            self.count = 1;
-        } else {
-            self.count += 1;
-        }
+        self.count += 1;
 
         self.state()
     }
