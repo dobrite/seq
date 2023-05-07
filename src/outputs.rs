@@ -1,10 +1,11 @@
 use heapless::Vec;
 
-use crate::{output::Output, OutputState, OutputStates, Prob, Pwm, Rate};
+use crate::output::Gate;
+use crate::{OutputState, OutputStates, Prob, Pwm, Rate};
 
 pub struct Outputs {
     count: u32,
-    outputs: Vec<Output, 4>,
+    outputs: Vec<Gate, 4>,
 }
 
 impl Default for Outputs {
@@ -18,7 +19,7 @@ impl Outputs {
         let outputs = {
             let mut o = Vec::new();
             for _ in 0..num {
-                let output = Output::new(resolution, Rate::Unity, Pwm::P50, Prob::P100);
+                let output = Gate::new(resolution, Rate::Unity, Pwm::P50, Prob::P100);
                 o.push(output).ok();
             }
             o

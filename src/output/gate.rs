@@ -1,7 +1,7 @@
 use crate::{rng::Rng, Prob, Pwm, Rate};
 
 #[derive(Debug, PartialEq)]
-pub struct Output {
+pub struct Gate {
     cycle_target: u32,
     off_target: u32,
     pub(crate) on: bool,
@@ -13,15 +13,15 @@ pub struct Output {
     skip_cycle: bool,
 }
 
-impl Default for Output {
+impl Default for Gate {
     fn default() -> Self {
         Self::new(1_920, Rate::Unity, Pwm::P50, Prob::P100)
     }
 }
 
-impl Output {
+impl Gate {
     pub fn new(resolution: u32, rate: Rate, pwm: Pwm, prob: Prob) -> Self {
-        let mut output = Self {
+        let mut gate = Self {
             cycle_target: 0,
             off_target: 0,
             on: true,
@@ -33,11 +33,11 @@ impl Output {
             skip_cycle: false,
         };
 
-        output.calc_targets();
-        output.calc_skip_cycle();
-        output.calc_initial_state();
+        gate.calc_targets();
+        gate.calc_skip_cycle();
+        gate.calc_initial_state();
 
-        output
+        gate
     }
 
     fn calc_targets(&mut self) {
@@ -114,9 +114,9 @@ mod tests {
         let rate = Rate::Unity;
         let pwm = Pwm::P50;
         let prob = Prob::P100;
-        let output = Output::new(1_920, rate, pwm, prob);
+        let gate = Gate::new(1_920, rate, pwm, prob);
 
-        let expected = Output {
+        let expected = Gate {
             cycle_target: 1_920,
             off_target: 960,
             on: true,
@@ -128,81 +128,81 @@ mod tests {
             skip_cycle: false,
         };
 
-        assert_eq!(expected, output);
+        assert_eq!(expected, gate);
     }
 
     #[test]
     fn it_updates_on_through_two_full_cycles_at_pwm_p50() {
-        let mut output = Output::new(1_920, Rate::Unity, Pwm::P50, Prob::P100);
+        let mut gate = Gate::new(1_920, Rate::Unity, Pwm::P50, Prob::P100);
 
-        assert_eq!(ON, output.on);
+        assert_eq!(ON, gate.on);
 
-        output.tick(0);
-        assert_eq!(ON, output.on);
+        gate.tick(0);
+        assert_eq!(ON, gate.on);
 
-        output.tick(480);
-        assert_eq!(ON, output.on);
+        gate.tick(480);
+        assert_eq!(ON, gate.on);
 
-        output.tick(960);
-        assert_eq!(OFF, output.on);
+        gate.tick(960);
+        assert_eq!(OFF, gate.on);
 
-        output.tick(1_440);
-        assert_eq!(OFF, output.on);
+        gate.tick(1_440);
+        assert_eq!(OFF, gate.on);
 
-        output.tick(1_920);
-        assert_eq!(ON, output.on);
+        gate.tick(1_920);
+        assert_eq!(ON, gate.on);
 
-        output.tick(2_400);
-        assert_eq!(ON, output.on);
+        gate.tick(2_400);
+        assert_eq!(ON, gate.on);
 
-        output.tick(2_880);
-        assert_eq!(OFF, output.on);
+        gate.tick(2_880);
+        assert_eq!(OFF, gate.on);
 
-        output.tick(3_360);
-        assert_eq!(OFF, output.on);
+        gate.tick(3_360);
+        assert_eq!(OFF, gate.on);
 
-        output.tick(3_840);
-        assert_eq!(ON, output.on);
+        gate.tick(3_840);
+        assert_eq!(ON, gate.on);
     }
 
     #[test]
     fn it_updates_edge_change_through_two_full_cycles_at_pwm_p50() {
-        let mut output = Output::new(1_920, Rate::Unity, Pwm::P50, Prob::P100);
+        let mut gate = Gate::new(1_920, Rate::Unity, Pwm::P50, Prob::P100);
 
-        output.tick(0);
-        assert_eq!(OFF, output.edge_change);
-        output.tick(1);
-        assert_eq!(OFF, output.edge_change);
-        output.tick(2);
-        assert_eq!(OFF, output.edge_change);
+        gate.tick(0);
+        assert_eq!(OFF, gate.edge_change);
+        gate.tick(1);
+        assert_eq!(OFF, gate.edge_change);
+        gate.tick(2);
+        assert_eq!(OFF, gate.edge_change);
 
-        output.tick(959);
-        assert_eq!(OFF, output.edge_change);
-        output.tick(960);
-        assert_eq!(ON, output.edge_change);
-        output.tick(961);
-        assert_eq!(OFF, output.edge_change);
+        gate.tick(959);
+        assert_eq!(OFF, gate.edge_change);
+        gate.tick(960);
+        assert_eq!(ON, gate.edge_change);
+        gate.tick(961);
+        assert_eq!(OFF, gate.edge_change);
 
-        output.tick(1_919);
-        assert_eq!(OFF, output.edge_change);
-        output.tick(1_920);
-        assert_eq!(ON, output.edge_change);
-        output.tick(1_921);
-        assert_eq!(OFF, output.edge_change);
+        gate.tick(1_919);
+        assert_eq!(OFF, gate.edge_change);
+        gate.tick(1_920);
+        assert_eq!(ON, gate.edge_change);
+        gate.tick(1_921);
+        assert_eq!(OFF, gate.edge_change);
 
-        output.tick(2_879);
-        assert_eq!(OFF, output.edge_change);
-        output.tick(2_880);
-        assert_eq!(ON, output.edge_change);
-        output.tick(2_881);
-        assert_eq!(OFF, output.edge_change);
+        gate.tick(2_879);
+        assert_eq!(OFF, gate.edge_change);
+        gate.tick(2_880);
+        assert_eq!(ON, gate.edge_change);
+        gate.tick(2_881);
+        assert_eq!(OFF, gate.edge_change);
 
-        output.tick(3_839);
-        assert_eq!(OFF, output.edge_change);
-        output.tick(3_840);
-        assert_eq!(ON, output.edge_change);
-        output.tick(3_841);
-        assert_eq!(OFF, output.edge_change);
+        gate.tick(3_839);
+        assert_eq!(OFF, gate.edge_change);
+        gate.tick(3_840);
+        assert_eq!(ON, gate.edge_change);
+        gate.tick(3_841);
+        assert_eq!(OFF, gate.edge_change);
     }
 
     #[test]
@@ -210,25 +210,25 @@ mod tests {
         let rate = Rate::Mult(2.0);
         let pwm = Pwm::P50;
         let prob = Prob::P100;
-        let mut output = Output::new(1_920, rate, pwm, prob);
+        let mut gate = Gate::new(1_920, rate, pwm, prob);
 
-        assert_eq!(960, output.cycle_target);
-        assert_eq!(480, output.off_target);
-        assert_eq!(rate, output.rate);
+        assert_eq!(960, gate.cycle_target);
+        assert_eq!(480, gate.off_target);
+        assert_eq!(rate, gate.rate);
 
-        assert_eq!(ON, output.on);
+        assert_eq!(ON, gate.on);
 
-        output.tick(480);
-        assert_eq!(OFF, output.on);
+        gate.tick(480);
+        assert_eq!(OFF, gate.on);
 
-        output.tick(960);
-        assert_eq!(ON, output.on);
+        gate.tick(960);
+        assert_eq!(ON, gate.on);
 
-        output.tick(1_440);
-        assert_eq!(OFF, output.on);
+        gate.tick(1_440);
+        assert_eq!(OFF, gate.on);
 
-        output.tick(1_920);
-        assert_eq!(ON, output.on);
+        gate.tick(1_920);
+        assert_eq!(ON, gate.on);
     }
 
     #[test]
@@ -236,25 +236,25 @@ mod tests {
         let rate = Rate::Div(5.333_333_5);
         let pwm = Pwm::P50;
         let prob = Prob::P100;
-        let mut output = Output::new(1_920, rate, pwm, prob);
+        let mut gate = Gate::new(1_920, rate, pwm, prob);
 
-        assert_eq!(5_120, output.off_target);
-        assert_eq!(10_240, output.cycle_target);
-        assert_eq!(rate, output.rate);
+        assert_eq!(5_120, gate.off_target);
+        assert_eq!(10_240, gate.cycle_target);
+        assert_eq!(rate, gate.rate);
 
-        assert_eq!(ON, output.on);
+        assert_eq!(ON, gate.on);
 
-        output.tick(5_119);
-        assert_eq!(ON, output.on);
+        gate.tick(5_119);
+        assert_eq!(ON, gate.on);
 
-        output.tick(5_120);
-        assert_eq!(OFF, output.on);
+        gate.tick(5_120);
+        assert_eq!(OFF, gate.on);
 
-        output.tick(10_239);
-        assert_eq!(OFF, output.on);
+        gate.tick(10_239);
+        assert_eq!(OFF, gate.on);
 
-        output.tick(10_240);
-        assert_eq!(ON, output.on);
+        gate.tick(10_240);
+        assert_eq!(ON, gate.on);
     }
 
     #[test]
@@ -262,21 +262,21 @@ mod tests {
         let rate = Rate::Unity;
         let pwm = Pwm::P50;
         let prob = Prob::P10;
-        let mut output = Output::new(1_920, rate, pwm, prob);
+        let mut gate = Gate::new(1_920, rate, pwm, prob);
 
-        assert_eq!(OFF, output.on);
+        assert_eq!(OFF, gate.on);
 
-        output.tick(1_920);
-        assert_eq!(OFF, output.on);
+        gate.tick(1_920);
+        assert_eq!(OFF, gate.on);
 
-        output.tick(3_840);
-        assert_eq!(OFF, output.on);
+        gate.tick(3_840);
+        assert_eq!(OFF, gate.on);
 
-        output.tick(5_760);
-        assert_eq!(OFF, output.on);
+        gate.tick(5_760);
+        assert_eq!(OFF, gate.on);
 
-        output.tick(7_680);
-        assert_eq!(OFF, output.on);
+        gate.tick(7_680);
+        assert_eq!(OFF, gate.on);
     }
 
     #[test]
@@ -284,7 +284,7 @@ mod tests {
         let rate = Rate::Unity;
         let pwm = Pwm::Pew;
         let prob = Prob::P10;
-        let mut output = Output::new(1_920, rate, pwm, prob);
-        output.tick(1);
+        let mut gate = Gate::new(1_920, rate, pwm, prob);
+        gate.tick(1);
     }
 }
