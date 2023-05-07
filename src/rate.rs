@@ -1,6 +1,6 @@
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Rate {
-    Div(u8),
+    Div(f32),
     Unity,
-    Mult(u8),
+    Mult(f32),
 }

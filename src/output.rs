@@ -161,7 +161,7 @@ mod tests {
     #[test]
     fn it_ticks_at_twice_the_rate_with_rate_times_2() {
         let prob = Prob::P100;
-        let rate = Rate::Mult(2);
+        let rate = Rate::Mult(2.0);
         let mut output = Output::new(1_920, prob, rate);
 
         assert_eq!(960, output.cycle_target);
@@ -180,6 +180,31 @@ mod tests {
         assert_eq!(OFF, output.on);
 
         output.tick(1_920);
+        assert_eq!(ON, output.on);
+    }
+
+    #[test]
+    fn it_ticks_at_div_five_point_three_the_rate() {
+        let prob = Prob::P100;
+        let rate = Rate::Div(5.333_333_5);
+        let mut output = Output::new(1_920, prob, rate);
+
+        assert_eq!(5_120, output.off_target);
+        assert_eq!(10_240, output.cycle_target);
+        assert_eq!(rate, output.rate);
+
+        assert_eq!(ON, output.on);
+
+        output.tick(5_119);
+        assert_eq!(ON, output.on);
+
+        output.tick(5_120);
+        assert_eq!(OFF, output.on);
+
+        output.tick(10_239);
+        assert_eq!(OFF, output.on);
+
+        output.tick(10_240);
         assert_eq!(ON, output.on);
     }
 
