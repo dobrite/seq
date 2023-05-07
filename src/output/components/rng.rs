@@ -1,6 +1,6 @@
 use oorandom::Rand32;
 
-use crate::prob::Prob;
+use super::Prob;
 
 const RNG_SEED: u64 = 0;
 

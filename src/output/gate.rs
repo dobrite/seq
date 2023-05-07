@@ -1,4 +1,4 @@
-use crate::{rng::Rng, Prob, Pwm, Rate};
+use super::components::{Prob, Pwm, Rate, Rng};
 
 #[derive(Debug, PartialEq)]
 pub struct Gate {
