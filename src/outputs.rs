@@ -18,8 +18,8 @@ impl Outputs {
         let outputs = {
             let mut o = Vec::new();
             for _ in 0..num {
-                o.push(Output::new(resolution, Prob::P100, Rate::Unity))
-                    .ok();
+                let output = Output::new(resolution, Rate::Unity, Pwm::P50, Prob::P100);
+                o.push(output).ok();
             }
             o
         };

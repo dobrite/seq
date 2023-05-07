@@ -15,14 +15,12 @@ pub struct Output {
 
 impl Default for Output {
     fn default() -> Self {
-        Self::new(1_920, Prob::P100, Rate::Unity)
+        Self::new(1_920, Rate::Unity, Pwm::P50, Prob::P100)
     }
 }
 
 impl Output {
-    pub fn new(resolution: u32, prob: Prob, rate: Rate) -> Self {
-        let pwm = Pwm::P50;
-
+    pub fn new(resolution: u32, rate: Rate, pwm: Pwm, prob: Prob) -> Self {
         let mut output = Self {
             cycle_target: 0,
             off_target: 0,
@@ -113,9 +111,10 @@ mod tests {
 
     #[test]
     fn it_new() {
-        let prob = Prob::P100;
         let rate = Rate::Unity;
-        let output = Output::new(1_920, prob, rate);
+        let pwm = Pwm::P50;
+        let prob = Prob::P100;
+        let output = Output::new(1_920, rate, pwm, prob);
 
         let expected = Output {
             cycle_target: 1_920,
@@ -134,7 +133,7 @@ mod tests {
 
     #[test]
     fn it_updates_on_through_two_full_cycles_at_pwm_p50() {
-        let mut output = Output::new(1_920, Prob::P100, Rate::Unity);
+        let mut output = Output::new(1_920, Rate::Unity, Pwm::P50, Prob::P100);
 
         assert_eq!(ON, output.on);
 
@@ -168,7 +167,7 @@ mod tests {
 
     #[test]
     fn it_updates_edge_change_through_two_full_cycles_at_pwm_p50() {
-        let mut output = Output::new(1_920, Prob::P100, Rate::Unity);
+        let mut output = Output::new(1_920, Rate::Unity, Pwm::P50, Prob::P100);
 
         output.tick(0);
         assert_eq!(OFF, output.edge_change);
@@ -208,9 +207,10 @@ mod tests {
 
     #[test]
     fn it_ticks_at_twice_the_rate_with_rate_times_2() {
-        let prob = Prob::P100;
         let rate = Rate::Mult(2.0);
-        let mut output = Output::new(1_920, prob, rate);
+        let pwm = Pwm::P50;
+        let prob = Prob::P100;
+        let mut output = Output::new(1_920, rate, pwm, prob);
 
         assert_eq!(960, output.cycle_target);
         assert_eq!(480, output.off_target);
@@ -233,9 +233,10 @@ mod tests {
 
     #[test]
     fn it_ticks_at_div_five_point_three_the_rate() {
-        let prob = Prob::P100;
         let rate = Rate::Div(5.333_333_5);
-        let mut output = Output::new(1_920, prob, rate);
+        let pwm = Pwm::P50;
+        let prob = Prob::P100;
+        let mut output = Output::new(1_920, rate, pwm, prob);
 
         assert_eq!(5_120, output.off_target);
         assert_eq!(10_240, output.cycle_target);
@@ -258,9 +259,10 @@ mod tests {
 
     #[test]
     fn it_skips_cycles_based_on_prob() {
-        let prob = Prob::P10;
         let rate = Rate::Unity;
-        let mut output = Output::new(1_920, prob, rate);
+        let pwm = Pwm::P50;
+        let prob = Prob::P10;
+        let mut output = Output::new(1_920, rate, pwm, prob);
 
         assert_eq!(OFF, output.on);
 
