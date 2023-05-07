@@ -101,6 +101,9 @@ impl Output {
 mod tests {
     use super::*;
 
+    const ON: bool = true;
+    const OFF: bool = false;
+
     #[test]
     fn it_new() {
         let prob = Prob::P100;
@@ -125,34 +128,34 @@ mod tests {
     fn it_updates_through_two_full_cycles_at_pwm_p50() {
         let mut output = Output::new(1_920, Prob::P100, Rate::Unity);
 
-        assert!(output.on);
+        assert_eq!(ON, output.on);
 
         output.tick(0);
-        assert!(output.on);
+        assert_eq!(ON, output.on);
 
         output.tick(480);
-        assert!(output.on);
+        assert_eq!(ON, output.on);
 
         output.tick(960);
-        assert!(!output.on);
+        assert_eq!(OFF, output.on);
 
         output.tick(1_440);
-        assert!(!output.on);
+        assert_eq!(OFF, output.on);
 
         output.tick(1_920);
-        assert!(output.on);
+        assert_eq!(ON, output.on);
 
         output.tick(2_400);
-        assert!(output.on);
+        assert_eq!(ON, output.on);
 
         output.tick(2_880);
-        assert!(!output.on);
+        assert_eq!(OFF, output.on);
 
         output.tick(3_360);
-        assert!(!output.on);
+        assert_eq!(OFF, output.on);
 
         output.tick(3_840);
-        assert!(output.on);
+        assert_eq!(ON, output.on);
     }
 
     #[test]
@@ -165,19 +168,19 @@ mod tests {
         assert_eq!(480, output.off_target);
         assert_eq!(rate, output.rate);
 
-        assert!(output.on);
+        assert_eq!(ON, output.on);
 
         output.tick(480);
-        assert!(!output.on);
+        assert_eq!(OFF, output.on);
 
         output.tick(960);
-        assert!(output.on);
+        assert_eq!(ON, output.on);
 
         output.tick(1_440);
-        assert!(!output.on);
+        assert_eq!(OFF, output.on);
 
         output.tick(1_920);
-        assert!(output.on);
+        assert_eq!(ON, output.on);
     }
 
     #[test]
@@ -186,18 +189,18 @@ mod tests {
         let rate = Rate::Unity;
         let mut output = Output::new(1_920, prob, rate);
 
-        assert!(!output.on);
+        assert_eq!(OFF, output.on);
 
         output.tick(1_920);
-        assert!(!output.on);
+        assert_eq!(OFF, output.on);
 
         output.tick(3_840);
-        assert!(!output.on);
+        assert_eq!(OFF, output.on);
 
         output.tick(5_760);
-        assert!(!output.on);
+        assert_eq!(OFF, output.on);
 
         output.tick(7_680);
-        assert!(!output.on);
+        assert_eq!(OFF, output.on);
     }
 }
