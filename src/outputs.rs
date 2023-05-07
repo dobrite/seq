@@ -1,6 +1,6 @@
 use heapless::Vec;
 
-use crate::{output::Output, OutputState, Prob, Pwm, Rate};
+use crate::{output::Output, OutputState, OutputStates, Prob, Pwm, Rate};
 
 pub struct Outputs {
     count: u32,
@@ -27,7 +27,7 @@ impl Outputs {
         Self { count: 0, outputs }
     }
 
-    pub fn tick(&mut self) -> OutputState {
+    pub fn tick(&mut self) -> OutputStates {
         for o in self.outputs.iter_mut() {
             o.tick(self.count);
         }
@@ -49,10 +49,17 @@ impl Outputs {
         self.outputs[index].set_rate(rate);
     }
 
-    fn state(&self) -> OutputState {
-        let outputs = self.outputs.iter().map(|o| o.on).collect();
+    fn state(&self) -> OutputStates {
+        let outputs = self
+            .outputs
+            .iter()
+            .map(|o| OutputState {
+                on: o.on,
+                edge_change: o.edge_change,
+            })
+            .collect();
 
-        OutputState { outputs }
+        OutputStates { outputs }
     }
 }
 
@@ -67,12 +74,32 @@ mod tests {
         let result = outputs.state();
 
         let mut expected_outputs = Vec::new();
-        expected_outputs.push(true).unwrap();
-        expected_outputs.push(true).unwrap();
-        expected_outputs.push(true).unwrap();
-        expected_outputs.push(true).unwrap();
+        expected_outputs
+            .push(OutputState {
+                on: true,
+                edge_change: false,
+            })
+            .unwrap();
+        expected_outputs
+            .push(OutputState {
+                on: true,
+                edge_change: false,
+            })
+            .unwrap();
+        expected_outputs
+            .push(OutputState {
+                on: true,
+                edge_change: false,
+            })
+            .unwrap();
+        expected_outputs
+            .push(OutputState {
+                on: true,
+                edge_change: false,
+            })
+            .unwrap();
 
-        let expected = OutputState {
+        let expected = OutputStates {
             outputs: expected_outputs,
         };
 
@@ -87,8 +114,13 @@ mod tests {
         let result = outputs.state();
 
         let mut expected_states = Vec::new();
-        expected_states.push(true).unwrap();
-        let expected = OutputState {
+        expected_states
+            .push(OutputState {
+                on: true,
+                edge_change: false,
+            })
+            .unwrap();
+        let expected = OutputStates {
             outputs: expected_states,
         };
 
@@ -98,8 +130,13 @@ mod tests {
         let result = outputs.state();
 
         let mut expected_states = Vec::new();
-        expected_states.push(false).unwrap();
-        let expected = OutputState {
+        expected_states
+            .push(OutputState {
+                on: false,
+                edge_change: true,
+            })
+            .unwrap();
+        let expected = OutputStates {
             outputs: expected_states,
         };
 
