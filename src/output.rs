@@ -2,7 +2,6 @@ use crate::{rng::Rng, Prob, Pwm, Rate};
 
 #[derive(Debug, PartialEq)]
 pub struct Output {
-    count: u32,
     cycle_target: u32,
     off_target: u32,
     pub(crate) on: bool,
@@ -24,7 +23,6 @@ impl Output {
         let pwm = Pwm::P50;
 
         let mut output = Self {
-            count: 1,
             cycle_target: 0,
             off_target: 0,
             on: true,
@@ -84,23 +82,17 @@ impl Output {
         self.calc_targets();
     }
 
-    pub fn tick(&mut self, _count: u32) {
-        if self.count == self.cycle_target {
-            self.count = 1;
+    pub fn tick(&mut self, count: u32) {
+        let cycle_mod = count % self.cycle_target;
+        if cycle_mod % self.cycle_target == 0 {
             self.calc_skip_cycle();
-        } else {
-            self.count += 1;
-        }
-
-        if self.skip_cycle {
-            self.on = false;
+            self.on = !self.skip_cycle;
             return;
         }
 
-        if self.count <= self.off_target {
-            self.on = true
-        } else {
-            self.on = false
+        let off_mod = count % self.off_target;
+        if off_mod % self.off_target == 0 {
+            self.on = false;
         }
     }
 }
@@ -116,7 +108,6 @@ mod tests {
         let output = Output::new(1_920, prob, rate);
 
         let expected = Output {
-            count: 1,
             cycle_target: 1_920,
             off_target: 960,
             on: true,
@@ -131,42 +122,36 @@ mod tests {
     }
 
     #[test]
-    fn it_updates() {
+    fn it_updates_through_two_full_cycles_at_pwm_p50() {
         let mut output = Output::new(1_920, Prob::P100, Rate::Unity);
-        output.tick(1);
 
-        let expected_count = 2;
-
-        assert_eq!(expected_count, output.count);
-        assert!(output.on);
-    }
-
-    #[test]
-
-    fn it_updates_through_a_full_cycle() {
-        let mut output = Output::new(4, Prob::P100, Rate::Unity);
-
-        assert_eq!(1, output.count);
         assert!(output.on);
 
-        output.tick(1);
-
-        assert_eq!(2, output.count);
+        output.tick(0);
         assert!(output.on);
 
-        output.tick(2);
+        output.tick(480);
+        assert!(output.on);
 
-        assert_eq!(3, output.count);
+        output.tick(960);
         assert!(!output.on);
 
-        output.tick(3);
-
-        assert_eq!(4, output.count);
+        output.tick(1_440);
         assert!(!output.on);
 
-        output.tick(4);
+        output.tick(1_920);
+        assert!(output.on);
 
-        assert_eq!(1, output.count);
+        output.tick(2_400);
+        assert!(output.on);
+
+        output.tick(2_880);
+        assert!(!output.on);
+
+        output.tick(3_360);
+        assert!(!output.on);
+
+        output.tick(3_840);
         assert!(output.on);
     }
 
@@ -174,33 +159,45 @@ mod tests {
     fn it_ticks_at_twice_the_rate_with_rate_times_2() {
         let prob = Prob::P100;
         let rate = Rate::Mult(2);
-        let mut output = Output::new(4, prob, rate);
+        let mut output = Output::new(1_920, prob, rate);
 
-        assert_eq!(1, output.count);
-        assert_eq!(2, output.cycle_target);
-        assert_eq!(1, output.off_target);
+        assert_eq!(960, output.cycle_target);
+        assert_eq!(480, output.off_target);
         assert_eq!(rate, output.rate);
+
         assert!(output.on);
 
-        output.tick(1);
-
-        assert_eq!(2, output.count);
+        output.tick(480);
         assert!(!output.on);
+
+        output.tick(960);
+        assert!(output.on);
+
+        output.tick(1_440);
+        assert!(!output.on);
+
+        output.tick(1_920);
+        assert!(output.on);
     }
 
     #[test]
     fn it_skips_cycles_based_on_prob() {
         let prob = Prob::P10;
         let rate = Rate::Unity;
-        let mut output = Output::new(4, prob, rate);
+        let mut output = Output::new(1_920, prob, rate);
 
         assert!(!output.on);
-        output.tick(1);
+
+        output.tick(1_920);
         assert!(!output.on);
-        output.tick(2);
+
+        output.tick(3_840);
         assert!(!output.on);
-        output.tick(3);
+
+        output.tick(5_760);
         assert!(!output.on);
-        output.tick(4);
+
+        output.tick(7_680);
+        assert!(!output.on);
     }
 }

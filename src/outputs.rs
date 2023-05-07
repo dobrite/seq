@@ -26,7 +26,7 @@ impl Outputs {
         };
 
         Self {
-            count: 1,
+            count: 0,
             outputs,
             resolution,
         }
@@ -67,7 +67,7 @@ mod tests {
 
     #[test]
     fn it_new() {
-        let resolution = 24;
+        let resolution = 1_920;
         let outputs = Outputs::new(4, resolution);
         let result = outputs.state();
 
@@ -86,13 +86,24 @@ mod tests {
 
     #[test]
     fn it_updates() {
-        let resolution = 24;
+        let resolution = 2;
         let mut outputs = Outputs::new(1, resolution);
         outputs.tick();
         let result = outputs.state();
 
         let mut expected_states = Vec::new();
         expected_states.push(true).unwrap();
+        let expected = OutputState {
+            outputs: expected_states,
+        };
+
+        assert_eq!(expected, result);
+
+        outputs.tick();
+        let result = outputs.state();
+
+        let mut expected_states = Vec::new();
+        expected_states.push(false).unwrap();
         let expected = OutputState {
             outputs: expected_states,
         };
