@@ -5,6 +5,7 @@ pub struct Output {
     cycle_target: u32,
     off_target: u32,
     pub(crate) on: bool,
+    pub(crate) edge_change: bool,
     pwm: Pwm,
     rate: Rate,
     resolution: u32,
@@ -26,6 +27,7 @@ impl Output {
             cycle_target: 0,
             off_target: 0,
             on: true,
+            edge_change: false,
             pwm,
             rate,
             resolution,
@@ -83,10 +85,13 @@ impl Output {
     }
 
     pub fn tick(&mut self, count: u32) {
+        let initial_on = self.on;
+
         let cycle_mod = count % self.cycle_target;
         if cycle_mod % self.cycle_target == 0 {
             self.calc_skip_cycle();
             self.on = !self.skip_cycle;
+            self.edge_change = initial_on != self.on;
             return;
         }
 
@@ -94,6 +99,8 @@ impl Output {
         if off_mod % self.off_target == 0 {
             self.on = false;
         }
+
+        self.edge_change = initial_on != self.on;
     }
 }
 
@@ -114,6 +121,7 @@ mod tests {
             cycle_target: 1_920,
             off_target: 960,
             on: true,
+            edge_change: false,
             pwm: Pwm::P50,
             rate,
             resolution: 1_920,
@@ -125,7 +133,7 @@ mod tests {
     }
 
     #[test]
-    fn it_updates_through_two_full_cycles_at_pwm_p50() {
+    fn it_updates_on_through_two_full_cycles_at_pwm_p50() {
         let mut output = Output::new(1_920, Prob::P100, Rate::Unity);
 
         assert_eq!(ON, output.on);
@@ -156,6 +164,46 @@ mod tests {
 
         output.tick(3_840);
         assert_eq!(ON, output.on);
+    }
+
+    #[test]
+    fn it_updates_edge_change_through_two_full_cycles_at_pwm_p50() {
+        let mut output = Output::new(1_920, Prob::P100, Rate::Unity);
+
+        output.tick(0);
+        assert_eq!(OFF, output.edge_change);
+        output.tick(1);
+        assert_eq!(OFF, output.edge_change);
+        output.tick(2);
+        assert_eq!(OFF, output.edge_change);
+
+        output.tick(959);
+        assert_eq!(OFF, output.edge_change);
+        output.tick(960);
+        assert_eq!(ON, output.edge_change);
+        output.tick(961);
+        assert_eq!(OFF, output.edge_change);
+
+        output.tick(1_919);
+        assert_eq!(OFF, output.edge_change);
+        output.tick(1_920);
+        assert_eq!(ON, output.edge_change);
+        output.tick(1_921);
+        assert_eq!(OFF, output.edge_change);
+
+        output.tick(2_879);
+        assert_eq!(OFF, output.edge_change);
+        output.tick(2_880);
+        assert_eq!(ON, output.edge_change);
+        output.tick(2_881);
+        assert_eq!(OFF, output.edge_change);
+
+        output.tick(3_839);
+        assert_eq!(OFF, output.edge_change);
+        output.tick(3_840);
+        assert_eq!(ON, output.edge_change);
+        output.tick(3_841);
+        assert_eq!(OFF, output.edge_change);
     }
 
     #[test]
