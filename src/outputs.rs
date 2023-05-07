@@ -5,7 +5,6 @@ use crate::{output::Output, OutputState, Prob, Pwm, Rate};
 pub struct Outputs {
     count: u32,
     outputs: Vec<Output, 4>,
-    resolution: u32,
 }
 
 impl Default for Outputs {
@@ -25,11 +24,7 @@ impl Outputs {
             o
         };
 
-        Self {
-            count: 0,
-            outputs,
-            resolution,
-        }
+        Self { count: 0, outputs }
     }
 
     pub fn tick(&mut self) -> OutputState {
