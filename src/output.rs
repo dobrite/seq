@@ -47,9 +47,9 @@ impl Output {
 
     fn calc_cycle_target(&mut self) {
         self.cycle_target = match self.rate {
-            Rate::Div(div) => div as f32 * self.resolution as f32,
+            Rate::Div(div) => div * self.resolution as f32,
             Rate::Unity => self.resolution as f32,
-            Rate::Mult(mult) => (1.0 / mult as f32) * self.resolution as f32,
+            Rate::Mult(mult) => (1.0 / mult) * self.resolution as f32,
         } as u32
     }
 
