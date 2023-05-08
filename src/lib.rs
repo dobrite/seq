@@ -2,19 +2,16 @@
 
 use heapless::Vec;
 
-pub use output::{Prob, Pwm, Rate};
-pub use outputs::Outputs;
+pub use crate::seq::Seq;
+pub use lane::{Prob, Pwm, Rate};
 
-mod output;
-mod outputs;
+mod lane;
+mod seq;
 
-#[derive(Debug, PartialEq)]
-pub struct OutputStates {
-    pub outputs: Vec<OutputState, 4>,
-}
+pub type LaneStates = Vec<LaneState, 4>;
 
 #[derive(Debug, PartialEq)]
-pub struct OutputState {
+pub struct LaneState {
     pub on: bool,
     pub edge_change: bool,
 }
