@@ -2,6 +2,7 @@ use super::components::{Prob, Pwm, Rate, Rng};
 
 #[derive(Debug, PartialEq)]
 pub struct Gate {
+    cycle_enabled: bool,
     cycle_target: u32,
     off_target: u32,
     pub(crate) on: bool,
@@ -10,7 +11,6 @@ pub struct Gate {
     rate: Rate,
     resolution: u32,
     rng: Rng,
-    skip_cycle: bool,
 }
 
 impl Default for Gate {
@@ -22,6 +22,7 @@ impl Default for Gate {
 impl Gate {
     pub fn new(resolution: u32, rate: Rate, pwm: Pwm, prob: Prob) -> Self {
         let mut gate = Self {
+            cycle_enabled: true,
             cycle_target: 0,
             off_target: 0,
             on: true,
@@ -30,11 +31,10 @@ impl Gate {
             rate,
             resolution,
             rng: Rng::new(prob),
-            skip_cycle: false,
         };
 
         gate.calc_targets();
-        gate.calc_skip_cycle();
+        gate.calc_cycle_enabled();
         gate.calc_initial_state();
 
         gate
@@ -58,17 +58,17 @@ impl Gate {
         self.off_target = (ratio * self.cycle_target as f32) as u32
     }
 
-    fn calc_skip_cycle(&mut self) {
-        self.skip_cycle = !self.rng.rand_bool();
+    fn calc_cycle_enabled(&mut self) {
+        self.cycle_enabled = self.rng.rand_bool();
     }
 
     fn calc_initial_state(&mut self) {
-        self.on = !self.skip_cycle
+        self.on = self.cycle_enabled
     }
 
     pub fn set_prob(&mut self, prob: Prob) {
         self.rng = Rng::new(prob);
-        self.calc_skip_cycle();
+        self.calc_cycle_enabled();
         self.calc_initial_state();
     }
 
@@ -87,8 +87,8 @@ impl Gate {
 
         let cycle_mod = count % self.cycle_target;
         if cycle_mod % self.cycle_target == 0 {
-            self.calc_skip_cycle();
-            self.on = !self.skip_cycle;
+            self.calc_cycle_enabled();
+            self.on = self.cycle_enabled;
             self.edge_change = initial_on != self.on;
             return;
         }
@@ -117,6 +117,7 @@ mod tests {
         let gate = Gate::new(1_920, rate, pwm, prob);
 
         let expected = Gate {
+            cycle_enabled: true,
             cycle_target: 1_920,
             off_target: 960,
             on: true,
@@ -125,7 +126,6 @@ mod tests {
             rate,
             resolution: 1_920,
             rng: Rng::new(prob),
-            skip_cycle: false,
         };
 
         assert_eq!(expected, gate);
