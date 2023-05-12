@@ -64,9 +64,9 @@ impl Seq {
     fn state(&self) -> LaneStates {
         self.lanes
             .iter()
-            .map(|o| LaneState {
-                on: o.on,
-                edge_change: o.edge_change,
+            .map(|l| LaneState {
+                on: l.on,
+                edge_change: l.edge_change,
             })
             .collect()
     }
