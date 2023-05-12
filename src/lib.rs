@@ -4,9 +4,11 @@ use heapless::Vec;
 
 pub use crate::seq::Seq;
 pub use lane::{Prob, Pwm, Rate};
+pub use ticks::tick_duration;
 
 mod lane;
 mod seq;
+mod ticks;
 
 pub type LaneStates = Vec<LaneState, 4>;
 

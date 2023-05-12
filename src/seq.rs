@@ -1,7 +1,6 @@
 use heapless::Vec;
 
-use crate::lane::Gate;
-use crate::{LaneState, LaneStates, Prob, Pwm, Rate};
+use crate::{lane::Gate, ticks, LaneState, LaneStates, Prob, Pwm, Rate};
 
 pub struct Seq {
     count: u32,
@@ -10,22 +9,34 @@ pub struct Seq {
 
 impl Default for Seq {
     fn default() -> Self {
-        Self::new(4, 1_920)
+        Self::new(4)
     }
 }
 
 impl Seq {
-    pub fn new(num: usize, resolution: u32) -> Self {
-        let lanes = {
-            let mut o = Vec::new();
-            for _ in 0..num {
-                let lane = Gate::new(resolution, Rate::Unity, Pwm::P50, Prob::P100);
-                o.push(lane).ok();
-            }
-            o
-        };
+    pub fn new(num: usize) -> Self {
+        let resolution = ticks::resolution();
+        Self {
+            count: 0,
+            lanes: Self::build_lanes(num, resolution),
+        }
+    }
 
-        Self { count: 0, lanes }
+    #[cfg(test)]
+    fn new_with_resolution(num: usize, resolution: u32) -> Self {
+        Self {
+            count: 0,
+            lanes: Self::build_lanes(num, resolution),
+        }
+    }
+
+    fn build_lanes(num: usize, resolution: u32) -> Vec<Gate, 4> {
+        let mut o = Vec::new();
+        for _ in 0..num {
+            let lane = Gate::new(resolution, Rate::Unity, Pwm::P50, Prob::P100);
+            o.push(lane).ok();
+        }
+        o
     }
 
     pub fn tick(&mut self) -> LaneStates {
@@ -68,7 +79,7 @@ mod tests {
     #[test]
     fn it_new() {
         let resolution = 1_920;
-        let seq = Seq::new(4, resolution);
+        let seq = Seq::new_with_resolution(4, resolution);
         let result = seq.state();
 
         let expected = LaneState {
@@ -85,8 +96,7 @@ mod tests {
 
     #[test]
     fn it_updates() {
-        let resolution = 2;
-        let mut seq = Seq::new(1, resolution);
+        let mut seq = Seq::new_with_resolution(1, 2);
         seq.tick();
         let result = seq.state();
 
