@@ -46,11 +46,7 @@ impl Gate {
     }
 
     fn calc_cycle_target(&mut self) {
-        self.cycle_target = match self.rate {
-            Rate::Div(div) => div * self.resolution as f32,
-            Rate::Unity => self.resolution as f32,
-            Rate::Mult(mult) => (1.0 / mult) * self.resolution as f32,
-        } as u32
+        self.cycle_target = (Into::<f32>::into(self.rate) * self.resolution as f32) as u32
     }
 
     fn calc_off_target(&mut self) {
@@ -104,7 +100,7 @@ impl Gate {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::{super::components::Frac, *};
 
     const ON: bool = true;
     const OFF: bool = false;
@@ -206,8 +202,8 @@ mod tests {
     }
 
     #[test]
-    fn it_ticks_at_twice_the_rate_with_rate_times_2() {
-        let rate = Rate::Mult(2.0);
+    fn it_ticks_at_mult_two_point_zero_times_the_rate() {
+        let rate = Rate::Mult(2, Frac::Zero);
         let pwm = Pwm::P50;
         let prob = Prob::P100;
         let mut gate = Gate::new(1_920, rate, pwm, prob);
@@ -232,8 +228,8 @@ mod tests {
     }
 
     #[test]
-    fn it_ticks_at_div_five_point_three_the_rate() {
-        let rate = Rate::Div(5.333_333_5);
+    fn it_ticks_at_div_five_point_one_third_the_rate() {
+        let rate = Rate::Div(5, Frac::OneThird);
         let pwm = Pwm::P50;
         let prob = Prob::P100;
         let mut gate = Gate::new(1_920, rate, pwm, prob);
