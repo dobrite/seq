@@ -19,36 +19,34 @@ impl Default for Seq {
 impl Seq {
     pub fn new(num: usize) -> Self {
         let resolution = ticks::resolution();
-        Self {
-            count: 0,
-            lanes: Self::build_lanes(num, resolution),
-        }
+        let mut lanes = Vec::new();
+        Self::build_lanes(num, resolution, &mut lanes);
+
+        Self { count: 0, lanes }
     }
 
     #[cfg(test)]
     fn new_with_resolution(num: usize, resolution: u32) -> Self {
-        Self {
-            count: 0,
-            lanes: Self::build_lanes(num, resolution),
-        }
+        let mut lanes = Vec::new();
+        Self::build_lanes(num, resolution, &mut lanes);
+
+        Self { count: 0, lanes }
     }
 
-    fn build_lanes(num: usize, resolution: u32) -> Vec<Lane, 4> {
-        let mut o = Vec::new();
+    fn build_lanes(num: usize, resolution: u32, lanes: &mut Vec<Lane, 4>) {
         for idx in 0..num {
             let lane = if idx == 0 {
                 Lane::Euclid(Euclid::new(resolution, Rate::Unity, 4, 16))
             } else {
                 Lane::Gate(Gate::new(resolution, Rate::Unity, Pwm::P50, Prob::P100))
             };
-            o.push(lane).ok();
+            lanes.push(lane).ok();
         }
-        o
     }
 
     pub fn tick(&mut self) -> LaneStates {
-        for o in self.lanes.iter_mut() {
-            o.tick(self.count);
+        for lane in self.lanes.iter_mut() {
+            lane.tick(self.count);
         }
 
         self.count += 1;
