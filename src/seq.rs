@@ -1,10 +1,13 @@
 use heapless::Vec;
 
-use crate::{lane::Gate, ticks, LaneState, LaneStates, Prob, Pwm, Rate};
+use crate::{
+    lane::{Euclid, Gate, Lane},
+    ticks, LaneStates, Prob, Pwm, Rate,
+};
 
 pub struct Seq {
     count: u32,
-    lanes: Vec<Gate, 4>,
+    lanes: Vec<Lane, 4>,
 }
 
 impl Default for Seq {
@@ -30,10 +33,14 @@ impl Seq {
         }
     }
 
-    fn build_lanes(num: usize, resolution: u32) -> Vec<Gate, 4> {
+    fn build_lanes(num: usize, resolution: u32) -> Vec<Lane, 4> {
         let mut o = Vec::new();
-        for _ in 0..num {
-            let lane = Gate::new(resolution, Rate::Unity, Pwm::P50, Prob::P100);
+        for idx in 0..num {
+            let lane = if idx == 0 {
+                Lane::Euclid(Euclid::new(resolution, Rate::Unity, 4, 16))
+            } else {
+                Lane::Gate(Gate::new(resolution, Rate::Unity, Pwm::P50, Prob::P100))
+            };
             o.push(lane).ok();
         }
         o
@@ -62,19 +69,14 @@ impl Seq {
     }
 
     fn state(&self) -> LaneStates {
-        self.lanes
-            .iter()
-            .map(|l| LaneState {
-                on: l.on,
-                edge_change: l.edge_change,
-            })
-            .collect()
+        self.lanes.iter().map(|lane| lane.into()).collect()
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::LaneState;
 
     #[test]
     fn it_new() {

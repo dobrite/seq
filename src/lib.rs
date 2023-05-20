@@ -4,6 +4,7 @@ use heapless::Vec;
 pub use lane::{Prob, Pwm, Rate};
 pub use ticks::tick_duration;
 
+use crate::lane::Lane;
 pub use crate::seq::Seq;
 
 mod lane;
@@ -16,4 +17,19 @@ pub type LaneStates = Vec<LaneState, 4>;
 pub struct LaneState {
     pub on: bool,
     pub edge_change: bool,
+}
+
+impl From<&Lane> for LaneState {
+    fn from(val: &Lane) -> Self {
+        match val {
+            Lane::Gate(gate) => LaneState {
+                on: gate.on,
+                edge_change: gate.edge_change,
+            },
+            Lane::Euclid(euclid) => LaneState {
+                on: euclid.on,
+                edge_change: euclid.edge_change,
+            },
+        }
+    }
 }

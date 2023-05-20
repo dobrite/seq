@@ -42,6 +42,10 @@ impl Euclid {
         }
     }
 
+    pub fn set_rate(&mut self, rate: Rate) {
+        self.rate = rate;
+    }
+
     #[allow(dead_code)]
     pub fn tick(&mut self, count: u32) {
         let initial_on = self.on;
