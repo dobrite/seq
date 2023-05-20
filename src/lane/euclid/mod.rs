@@ -18,12 +18,12 @@ pub struct Euclid {
 
 impl Default for Euclid {
     fn default() -> Self {
-        Self::new(1_920, Rate::Unity, 16, 4)
+        Self::new(1_920, Rate::Unity, 4, 16)
     }
 }
 
 impl Euclid {
-    pub fn new(resolution: u32, rate: Rate, length: u32, density: u32) -> Self {
+    pub fn new(resolution: u32, rate: Rate, density: u32, length: u32) -> Self {
         let mut sequence: Vec<bool, 16> = Vec::new();
         for _ in 0..16 {
             sequence.push(false).unwrap();
@@ -69,9 +69,9 @@ mod tests {
     #[test]
     fn it_new() {
         let rate = Rate::Unity;
-        let length = 16;
         let density = 4;
-        let euclid = Euclid::new(1_920, rate, length, density);
+        let length = 16;
+        let euclid = Euclid::new(1_920, rate, density, length);
         let mut sequence: Vec<bool, 16> = Vec::new();
         for _ in 0..16 {
             sequence.push(false).unwrap();
@@ -94,7 +94,7 @@ mod tests {
 
     #[test]
     fn it_updates_on_at_length_sixteen_at_density_four() {
-        let mut euclid = Euclid::new(1_920, Rate::Unity, 16, 4);
+        let mut euclid = Euclid::new(1_920, Rate::Unity, 4, 16);
 
         euclid.tick(0);
         assert_eq!(ON, euclid.on);
@@ -150,7 +150,7 @@ mod tests {
 
     #[test]
     fn it_updates_edge_change_at_length_sixteen_at_density_four() {
-        let mut euclid = Euclid::new(1_920, Rate::Unity, 16, 4);
+        let mut euclid = Euclid::new(1_920, Rate::Unity, 4, 16);
 
         assert_eq!(OFF, euclid.edge_change);
         euclid.tick(0);
@@ -168,4 +168,3 @@ mod tests {
         assert_eq!(OFF, euclid.edge_change);
     }
 }
-

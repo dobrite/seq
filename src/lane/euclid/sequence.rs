@@ -46,8 +46,8 @@ mod tests {
 
     #[test]
     fn it_builds_a_sequence_of_length_sixteen_at_density_four() {
-        let length = 16;
         let density = 4;
+        let length = 16;
 
         let mut result: heapless::Vec<bool, 16> = {
             let mut v = Vec::new();
@@ -69,8 +69,8 @@ mod tests {
 
     #[test]
     fn it_builds_a_sequence_of_length_sixteen_at_density_nine() {
-        let length = 16;
         let density = 9;
+        let length = 16;
 
         let mut result: heapless::Vec<bool, 16> = {
             let mut v = Vec::new();
