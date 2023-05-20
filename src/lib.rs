@@ -1,10 +1,10 @@
 #![cfg_attr(not(test), no_std)]
 
 use heapless::Vec;
-
-pub use crate::seq::Seq;
 pub use lane::{Prob, Pwm, Rate};
 pub use ticks::tick_duration;
+
+pub use crate::seq::Seq;
 
 mod lane;
 mod seq;
