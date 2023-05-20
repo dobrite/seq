@@ -1,7 +1,7 @@
 #![cfg_attr(not(test), no_std)]
 
 use heapless::Vec;
-pub use lane::{Prob, Pwm, Rate};
+pub use lane::{Frac, Prob, Pwm, Rate};
 pub use ticks::tick_duration;
 
 use crate::lane::Lane;
