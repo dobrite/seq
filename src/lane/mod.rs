@@ -1,7 +1,7 @@
 pub use self::{
     components::{Frac, Prob, Pwm, Rate, Rng},
     euclid::Euclid,
-    gate::Gate,
+    gate::{Gate, State},
 };
 
 mod components;

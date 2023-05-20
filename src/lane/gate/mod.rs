@@ -1,4 +1,8 @@
+pub use state::State;
+
 use super::components::{Prob, Pwm, Rate, Rng};
+
+mod state;
 
 #[derive(Debug, PartialEq)]
 pub struct Gate {
@@ -7,30 +11,28 @@ pub struct Gate {
     off_target: u32,
     pub(crate) on: bool,
     pub(crate) edge_change: bool,
-    pwm: Pwm,
-    rate: Rate,
     resolution: u32,
     rng: Rng,
+    state: State,
 }
 
 impl Default for Gate {
     fn default() -> Self {
-        Self::new(1_920, Rate::Unity, Pwm::P50, Prob::P100)
+        Self::new(1_920, Default::default())
     }
 }
 
 impl Gate {
-    pub fn new(resolution: u32, rate: Rate, pwm: Pwm, prob: Prob) -> Self {
+    pub fn new(resolution: u32, state: State) -> Self {
         let mut gate = Self {
             cycle_enabled: true,
             cycle_target: 0,
             off_target: 0,
             on: true,
             edge_change: false,
-            pwm,
-            rate,
             resolution,
-            rng: Rng::new(prob),
+            rng: Rng::new(state.prob),
+            state,
         };
 
         gate.calc_targets();
@@ -46,11 +48,11 @@ impl Gate {
     }
 
     fn calc_cycle_target(&mut self) {
-        self.cycle_target = (Into::<f32>::into(self.rate) * self.resolution as f32) as u32
+        self.cycle_target = (Into::<f32>::into(self.state.rate) * self.resolution as f32) as u32
     }
 
     fn calc_off_target(&mut self) {
-        let ratio: f32 = self.pwm.into();
+        let ratio: f32 = self.state.pwm.into();
         self.off_target = (ratio * self.cycle_target as f32) as u32
     }
 
@@ -69,12 +71,12 @@ impl Gate {
     }
 
     pub fn set_pwm(&mut self, pwm: Pwm) {
-        self.pwm = pwm;
+        self.state.pwm = pwm;
         self.calc_targets();
     }
 
     pub fn set_rate(&mut self, rate: Rate) {
-        self.rate = rate;
+        self.state.rate = rate;
         self.calc_targets();
     }
 
@@ -110,7 +112,8 @@ mod tests {
         let rate = Rate::Unity;
         let pwm = Pwm::P50;
         let prob = Prob::P100;
-        let gate = Gate::new(1_920, rate, pwm, prob);
+        let state = State { prob, pwm, rate };
+        let gate = Gate::new(1_920, state);
 
         let expected = Gate {
             cycle_enabled: true,
@@ -118,10 +121,9 @@ mod tests {
             off_target: 960,
             on: true,
             edge_change: false,
-            pwm: Pwm::P50,
-            rate,
             resolution: 1_920,
             rng: Rng::new(prob),
+            state,
         };
 
         assert_eq!(expected, gate);
@@ -129,7 +131,7 @@ mod tests {
 
     #[test]
     fn it_updates_on_through_two_full_cycles_at_pwm_p50() {
-        let mut gate = Gate::new(1_920, Rate::Unity, Pwm::P50, Prob::P100);
+        let mut gate = Gate::new(1_920, Default::default());
 
         assert_eq!(ON, gate.on);
 
@@ -163,7 +165,7 @@ mod tests {
 
     #[test]
     fn it_updates_edge_change_through_two_full_cycles_at_pwm_p50() {
-        let mut gate = Gate::new(1_920, Rate::Unity, Pwm::P50, Prob::P100);
+        let mut gate = Gate::new(1_920, Default::default());
 
         gate.tick(0);
         assert_eq!(OFF, gate.edge_change);
@@ -203,14 +205,14 @@ mod tests {
 
     #[test]
     fn it_ticks_at_mult_two_point_zero_times_the_rate() {
-        let rate = Rate::Mult(2, Frac::Zero);
-        let pwm = Pwm::P50;
         let prob = Prob::P100;
-        let mut gate = Gate::new(1_920, rate, pwm, prob);
+        let pwm = Pwm::P50;
+        let rate = Rate::Mult(2, Frac::Zero);
+        let mut gate = Gate::new(1_920, State { prob, pwm, rate });
 
         assert_eq!(960, gate.cycle_target);
         assert_eq!(480, gate.off_target);
-        assert_eq!(rate, gate.rate);
+        assert_eq!(rate, gate.state.rate);
 
         assert_eq!(ON, gate.on);
 
@@ -229,14 +231,14 @@ mod tests {
 
     #[test]
     fn it_ticks_at_div_five_point_one_third_the_rate() {
-        let rate = Rate::Div(5, Frac::OneThird);
-        let pwm = Pwm::P50;
         let prob = Prob::P100;
-        let mut gate = Gate::new(1_920, rate, pwm, prob);
+        let pwm = Pwm::P50;
+        let rate = Rate::Div(5, Frac::OneThird);
+        let mut gate = Gate::new(1_920, State { prob, pwm, rate });
 
         assert_eq!(5_120, gate.off_target);
         assert_eq!(10_240, gate.cycle_target);
-        assert_eq!(rate, gate.rate);
+        assert_eq!(rate, gate.state.rate);
 
         assert_eq!(ON, gate.on);
 
@@ -255,10 +257,10 @@ mod tests {
 
     #[test]
     fn it_skips_cycles_based_on_prob() {
-        let rate = Rate::Unity;
-        let pwm = Pwm::P50;
         let prob = Prob::P10;
-        let mut gate = Gate::new(1_920, rate, pwm, prob);
+        let pwm = Pwm::P50;
+        let rate = Rate::Unity;
+        let mut gate = Gate::new(1_920, State { prob, pwm, rate });
 
         assert_eq!(OFF, gate.on);
 
@@ -277,10 +279,10 @@ mod tests {
 
     #[test]
     fn it_works_with_pwm_pew() {
-        let rate = Rate::Unity;
-        let pwm = Pwm::Pew;
         let prob = Prob::P10;
-        let mut gate = Gate::new(1_920, rate, pwm, prob);
+        let pwm = Pwm::Pew;
+        let rate = Rate::Unity;
+        let mut gate = Gate::new(1_920, State { prob, pwm, rate });
         gate.tick(1);
     }
 }
