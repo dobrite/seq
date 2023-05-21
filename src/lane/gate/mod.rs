@@ -1,8 +1,7 @@
-pub use state::State;
-
-use super::components::{Prob, Pwm, Rate, Rng};
-
-mod state;
+use super::{
+    components::{Prob, Pwm, Rate, Rng},
+    Config,
+};
 
 #[derive(Debug, PartialEq)]
 pub struct Gate {
@@ -13,7 +12,7 @@ pub struct Gate {
     pub(crate) edge_change: bool,
     resolution: u32,
     rng: Rng,
-    state: State,
+    config: Config,
 }
 
 impl Default for Gate {
@@ -23,7 +22,7 @@ impl Default for Gate {
 }
 
 impl Gate {
-    pub fn new(resolution: u32, state: State) -> Self {
+    pub fn new(resolution: u32, config: Config) -> Self {
         let mut gate = Self {
             cycle_enabled: true,
             cycle_target: 0,
@@ -31,8 +30,8 @@ impl Gate {
             on: true,
             edge_change: false,
             resolution,
-            rng: Rng::new(state.prob),
-            state,
+            rng: Rng::new(config.prob),
+            config,
         };
 
         gate.calc_targets();
@@ -48,11 +47,11 @@ impl Gate {
     }
 
     fn calc_cycle_target(&mut self) {
-        self.cycle_target = (Into::<f32>::into(self.state.rate) * self.resolution as f32) as u32
+        self.cycle_target = (Into::<f32>::into(self.config.rate) * self.resolution as f32) as u32
     }
 
     fn calc_off_target(&mut self) {
-        let ratio: f32 = self.state.pwm.into();
+        let ratio: f32 = self.config.pwm.into();
         self.off_target = (ratio * self.cycle_target as f32) as u32
     }
 
@@ -71,12 +70,12 @@ impl Gate {
     }
 
     pub fn set_pwm(&mut self, pwm: Pwm) {
-        self.state.pwm = pwm;
+        self.config.pwm = pwm;
         self.calc_targets();
     }
 
     pub fn set_rate(&mut self, rate: Rate) {
-        self.state.rate = rate;
+        self.config.rate = rate;
         self.calc_targets();
     }
 
@@ -112,8 +111,8 @@ mod tests {
         let rate = Rate::Unity;
         let pwm = Pwm::P50;
         let prob = Prob::P100;
-        let state = State { prob, pwm, rate };
-        let gate = Gate::new(1_920, state);
+        let config = Config { prob, pwm, rate };
+        let gate = Gate::new(1_920, config);
 
         let expected = Gate {
             cycle_enabled: true,
@@ -123,7 +122,7 @@ mod tests {
             edge_change: false,
             resolution: 1_920,
             rng: Rng::new(prob),
-            state,
+            config,
         };
 
         assert_eq!(expected, gate);
@@ -208,11 +207,12 @@ mod tests {
         let prob = Prob::P100;
         let pwm = Pwm::P50;
         let rate = Rate::Mult(2, Frac::Zero);
-        let mut gate = Gate::new(1_920, State { prob, pwm, rate });
+        let config = Config { prob, pwm, rate };
+        let mut gate = Gate::new(1_920, config);
 
         assert_eq!(960, gate.cycle_target);
         assert_eq!(480, gate.off_target);
-        assert_eq!(rate, gate.state.rate);
+        assert_eq!(rate, gate.config.rate);
 
         assert_eq!(ON, gate.on);
 
@@ -234,11 +234,12 @@ mod tests {
         let prob = Prob::P100;
         let pwm = Pwm::P50;
         let rate = Rate::Div(5, Frac::OneThird);
-        let mut gate = Gate::new(1_920, State { prob, pwm, rate });
+        let config = Config { prob, pwm, rate };
+        let mut gate = Gate::new(1_920, config);
 
         assert_eq!(5_120, gate.off_target);
         assert_eq!(10_240, gate.cycle_target);
-        assert_eq!(rate, gate.state.rate);
+        assert_eq!(rate, gate.config.rate);
 
         assert_eq!(ON, gate.on);
 
@@ -260,7 +261,8 @@ mod tests {
         let prob = Prob::P10;
         let pwm = Pwm::P50;
         let rate = Rate::Unity;
-        let mut gate = Gate::new(1_920, State { prob, pwm, rate });
+        let config = Config { prob, pwm, rate };
+        let mut gate = Gate::new(1_920, config);
 
         assert_eq!(OFF, gate.on);
 
@@ -282,7 +284,8 @@ mod tests {
         let prob = Prob::P10;
         let pwm = Pwm::Pew;
         let rate = Rate::Unity;
-        let mut gate = Gate::new(1_920, State { prob, pwm, rate });
+        let config = Config { prob, pwm, rate };
+        let mut gate = Gate::new(1_920, config);
         gate.tick(1);
     }
 }

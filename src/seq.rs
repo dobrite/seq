@@ -1,7 +1,7 @@
 use heapless::Vec;
 
 use crate::{
-    lane::{Euclid, Gate, Lane, State},
+    lane::{Config, Euclid, Gate, Lane},
     ticks, LaneStates, Prob, Pwm, Rate,
 };
 
@@ -17,28 +17,28 @@ impl Default for Seq {
 }
 
 impl Seq {
-    pub fn new(states: Vec<State, 4>) -> Self {
+    pub fn new(configs: Vec<Config, 4>) -> Self {
         let resolution = ticks::resolution();
         let mut lanes = Vec::new();
-        Self::build_lanes(resolution, states, &mut lanes);
+        Self::build_lanes(resolution, configs, &mut lanes);
 
         Self { count: 0, lanes }
     }
 
     #[cfg(test)]
-    fn new_with_resolution(resolution: u32, states: Vec<State, 4>) -> Self {
+    fn new_with_resolution(resolution: u32, configs: Vec<Config, 4>) -> Self {
         let mut lanes = Vec::new();
-        Self::build_lanes(resolution, states, &mut lanes);
+        Self::build_lanes(resolution, configs, &mut lanes);
 
         Self { count: 0, lanes }
     }
 
-    fn build_lanes(resolution: u32, states: Vec<State, 4>, lanes: &mut Vec<Lane, 4>) {
-        for idx in 0..states.len() {
+    fn build_lanes(resolution: u32, configs: Vec<Config, 4>, lanes: &mut Vec<Lane, 4>) {
+        for idx in 0..configs.len() {
             let lane = if idx == 0 {
                 Lane::Euclid(Euclid::new(resolution, Rate::Unity, 4, 16))
             } else {
-                Lane::Gate(Gate::new(resolution, states[idx]))
+                Lane::Gate(Gate::new(resolution, configs[idx]))
             };
             lanes.push(lane).ok();
         }
@@ -79,11 +79,11 @@ mod tests {
     #[test]
     fn it_new() {
         let resolution = 1_920;
-        let mut states: Vec<State, 4> = Vec::new();
+        let mut configs: Vec<Config, 4> = Vec::new();
         for _ in 0..4 {
-            states.push(Default::default()).unwrap();
+            configs.push(Default::default()).unwrap();
         }
-        let seq = Seq::new_with_resolution(resolution, states);
+        let seq = Seq::new_with_resolution(resolution, configs);
         let result = seq.state();
 
         let expected = LaneState {
@@ -101,11 +101,11 @@ mod tests {
     #[test]
     fn it_updates() {
         let resolution = 2;
-        let mut states: Vec<State, 4> = Vec::new();
+        let mut configs: Vec<Config, 4> = Vec::new();
         for _ in 0..1 {
-            states.push(Default::default()).unwrap();
+            configs.push(Default::default()).unwrap();
         }
-        let mut seq = Seq::new_with_resolution(resolution, states);
+        let mut seq = Seq::new_with_resolution(resolution, configs);
         seq.tick();
         let result = seq.state();
 

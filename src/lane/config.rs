@@ -1,21 +1,21 @@
 use super::{Prob, Pwm, Rate};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct State {
+pub struct Config {
     pub prob: Prob,
     pub pwm: Pwm,
     pub rate: Rate,
 }
 
-impl Default for State {
+impl Default for Config {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl State {
+impl Config {
     pub fn new() -> Self {
-        State {
+        Self {
             prob: Prob::P100,
             pwm: Pwm::P50,
             rate: Rate::Unity,

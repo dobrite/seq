@@ -1,10 +1,12 @@
 pub use self::{
     components::{Frac, Prob, Pwm, Rate, Rng},
+    config::Config,
     euclid::Euclid,
-    gate::{Gate, State},
+    gate::Gate,
 };
 
 mod components;
+mod config;
 mod euclid;
 mod gate;
 
