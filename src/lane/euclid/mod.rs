@@ -1,14 +1,14 @@
 use heapless::Vec;
 
-use super::components::Rate;
+use super::components::{Density, Length, Rate};
 
 mod sequence;
 
 #[derive(Debug, PartialEq)]
 pub struct Euclid {
     cycle_target: u32,
-    density: u32,
-    length: u32,
+    density: Density,
+    length: Length,
     pub(crate) edge_change: bool,
     pub(crate) on: bool,
     rate: Rate,
@@ -18,12 +18,12 @@ pub struct Euclid {
 
 impl Default for Euclid {
     fn default() -> Self {
-        Self::new(1_920, Rate::Unity, 4, 16)
+        Self::new(1_920, Rate::Unity, Density(4), Length(16))
     }
 }
 
 impl Euclid {
-    pub fn new(resolution: u32, rate: Rate, density: u32, length: u32) -> Self {
+    pub fn new(resolution: u32, rate: Rate, density: Density, length: Length) -> Self {
         let mut sequence: Vec<bool, 16> = Vec::new();
         for _ in 0..16 {
             sequence.push(false).unwrap();
@@ -55,7 +55,7 @@ impl Euclid {
         }
 
         if count % self.cycle_target == 0 {
-            let index = count / self.cycle_target % self.length;
+            let index = count / self.cycle_target % self.length.0;
             self.on = self.sequence[index as usize];
         }
 
@@ -73,8 +73,8 @@ mod tests {
     #[test]
     fn it_new() {
         let rate = Rate::Unity;
-        let density = 4;
-        let length = 16;
+        let density = Density(4);
+        let length = Length(16);
         let euclid = Euclid::new(1_920, rate, density, length);
         let mut sequence: Vec<bool, 16> = Vec::new();
         for _ in 0..16 {
@@ -98,7 +98,7 @@ mod tests {
 
     #[test]
     fn it_updates_on_at_length_sixteen_at_density_four() {
-        let mut euclid = Euclid::new(1_920, Rate::Unity, 4, 16);
+        let mut euclid = Euclid::new(1_920, Rate::Unity, Density(4), Length(16));
 
         euclid.tick(0);
         assert_eq!(ON, euclid.on);
@@ -154,7 +154,7 @@ mod tests {
 
     #[test]
     fn it_updates_edge_change_at_length_sixteen_at_density_four() {
-        let mut euclid = Euclid::new(1_920, Rate::Unity, 4, 16);
+        let mut euclid = Euclid::new(1_920, Rate::Unity, Density(4), Length(16));
 
         assert_eq!(OFF, euclid.edge_change);
         euclid.tick(0);

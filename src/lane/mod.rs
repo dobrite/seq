@@ -1,5 +1,5 @@
 pub use self::{
-    components::{Frac, Prob, Pwm, Rate, Rng},
+    components::{Density, Frac, Length, Prob, Pwm, Rate, Rng},
     config::Config,
     euclid::Euclid,
     gate::Gate,

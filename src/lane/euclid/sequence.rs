@@ -1,13 +1,15 @@
 use heapless::Vec;
 
+use crate::lane::euclid::{Density, Length};
+
 // This generates incorrect sequences compared to
 // PAMs and Euclidean Circles V2
-pub fn fill(d: u32, l: u32, sequence: &mut Vec<bool, 16>) {
-    assert!(sequence.len() == 16);
-    assert!(d <= l);
+pub fn fill(d: Density, l: Length, sequence: &mut Vec<bool, 16>) {
+    let density = d.0 as i32;
+    let length = l.0 as i32;
 
-    let density = d as i32;
-    let length = l as i32;
+    assert!(sequence.len() == 16);
+    assert!(density <= length);
 
     // Hardcode this until I circle back to fix the algo
     let four_on_the_floor: heapless::Vec<bool, 16> = heapless::Vec::from_slice(&[
@@ -46,8 +48,8 @@ mod tests {
 
     #[test]
     fn it_builds_a_sequence_of_length_sixteen_at_density_four() {
-        let density = 4;
-        let length = 16;
+        let density = Density(4);
+        let length = Length(16);
 
         let mut result: heapless::Vec<bool, 16> = {
             let mut v = Vec::new();
@@ -69,8 +71,8 @@ mod tests {
 
     #[test]
     fn it_builds_a_sequence_of_length_sixteen_at_density_nine() {
-        let density = 9;
-        let length = 16;
+        let density = Density(9);
+        let length = Length(16);
 
         let mut result: heapless::Vec<bool, 16> = {
             let mut v = Vec::new();

@@ -1,7 +1,7 @@
 use heapless::Vec;
 
 use crate::{
-    lane::{Config, Euclid, Gate, Lane},
+    lane::{Config, Density, Euclid, Gate, Lane, Length},
     ticks, LaneStates, Prob, Pwm, Rate,
 };
 
@@ -36,7 +36,7 @@ impl Seq {
     fn build_lanes(resolution: u32, configs: Vec<Config, 4>, lanes: &mut Vec<Lane, 4>) {
         for idx in 0..configs.len() {
             let lane = if idx == 0 {
-                Lane::Euclid(Euclid::new(resolution, Rate::Unity, 4, 16))
+                Lane::Euclid(Euclid::new(resolution, Rate::Unity, Density(4), Length(16)))
             } else {
                 Lane::Gate(Gate::new(resolution, configs[idx]))
             };
