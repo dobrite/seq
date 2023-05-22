@@ -5,6 +5,7 @@ use super::{
 
 #[derive(Debug, PartialEq)]
 pub struct Gate {
+    config: Config,
     cycle_enabled: bool,
     cycle_target: u32,
     off_target: u32,
@@ -12,7 +13,6 @@ pub struct Gate {
     pub(crate) edge_change: bool,
     resolution: u32,
     rng: Rng,
-    config: Config,
 }
 
 impl Default for Gate {
@@ -24,6 +24,7 @@ impl Default for Gate {
 impl Gate {
     pub fn new(resolution: u32, config: Config) -> Self {
         let mut gate = Self {
+            config,
             cycle_enabled: true,
             cycle_target: 0,
             off_target: 0,
@@ -31,7 +32,6 @@ impl Gate {
             edge_change: false,
             resolution,
             rng: Rng::new(config.prob),
-            config,
         };
 
         gate.calc_targets();
@@ -129,6 +129,7 @@ mod tests {
         let gate = Gate::new(1_920, config);
 
         let expected = Gate {
+            config,
             cycle_enabled: true,
             cycle_target: 1_920,
             off_target: 960,
@@ -136,7 +137,6 @@ mod tests {
             edge_change: false,
             resolution: 1_920,
             rng: Rng::new(prob),
-            config,
         };
 
         assert_eq!(expected, gate);
