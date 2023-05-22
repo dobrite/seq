@@ -102,7 +102,7 @@ impl Gate {
 #[cfg(test)]
 mod tests {
     use super::{
-        super::{components::Frac, Density, Length},
+        super::{components::Frac, Density, Length, Type},
         *,
     };
 
@@ -116,13 +116,16 @@ mod tests {
         let prob = Prob::P100;
         let length = Length(16);
         let density = Density(4);
+        let r#type = Type::Gate;
         let config = Config {
             density,
             length,
             prob,
             pwm,
+            r#type,
             rate,
         };
+
         let gate = Gate::new(1_920, config);
 
         let expected = Gate {

@@ -3,12 +3,14 @@ pub use self::{
     config::Config,
     euclid::Euclid,
     gate::Gate,
+    r#type::Type,
 };
 
 mod components;
 mod config;
 mod euclid;
 mod gate;
+mod r#type;
 
 pub enum Lane {
     Gate(Gate),
