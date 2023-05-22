@@ -101,7 +101,10 @@ impl Gate {
 
 #[cfg(test)]
 mod tests {
-    use super::{super::components::Frac, *};
+    use super::{
+        super::{components::Frac, Density, Length},
+        *,
+    };
 
     const ON: bool = true;
     const OFF: bool = false;
@@ -111,7 +114,15 @@ mod tests {
         let rate = Rate::Unity;
         let pwm = Pwm::P50;
         let prob = Prob::P100;
-        let config = Config { prob, pwm, rate };
+        let length = Length(16);
+        let density = Density(4);
+        let config = Config {
+            density,
+            length,
+            prob,
+            pwm,
+            rate,
+        };
         let gate = Gate::new(1_920, config);
 
         let expected = Gate {
@@ -204,10 +215,11 @@ mod tests {
 
     #[test]
     fn it_ticks_at_mult_two_point_zero_times_the_rate() {
-        let prob = Prob::P100;
-        let pwm = Pwm::P50;
         let rate = Rate::Mult(2, Frac::Zero);
-        let config = Config { prob, pwm, rate };
+        let config = Config {
+            rate,
+            ..Default::default()
+        };
         let mut gate = Gate::new(1_920, config);
 
         assert_eq!(960, gate.cycle_target);
@@ -231,10 +243,11 @@ mod tests {
 
     #[test]
     fn it_ticks_at_div_five_point_one_third_the_rate() {
-        let prob = Prob::P100;
-        let pwm = Pwm::P50;
         let rate = Rate::Div(5, Frac::OneThird);
-        let config = Config { prob, pwm, rate };
+        let config = Config {
+            rate,
+            ..Default::default()
+        };
         let mut gate = Gate::new(1_920, config);
 
         assert_eq!(5_120, gate.off_target);
@@ -259,9 +272,10 @@ mod tests {
     #[test]
     fn it_skips_cycles_based_on_prob() {
         let prob = Prob::P10;
-        let pwm = Pwm::P50;
-        let rate = Rate::Unity;
-        let config = Config { prob, pwm, rate };
+        let config = Config {
+            prob,
+            ..Default::default()
+        };
         let mut gate = Gate::new(1_920, config);
 
         assert_eq!(OFF, gate.on);
@@ -281,10 +295,11 @@ mod tests {
 
     #[test]
     fn it_works_with_pwm_pew() {
-        let prob = Prob::P10;
         let pwm = Pwm::Pew;
-        let rate = Rate::Unity;
-        let config = Config { prob, pwm, rate };
+        let config = Config {
+            pwm,
+            ..Default::default()
+        };
         let mut gate = Gate::new(1_920, config);
         gate.tick(1);
     }
