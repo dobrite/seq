@@ -3,46 +3,46 @@ pub use self::{
     config::Config,
     euclid::Euclid,
     gate::Gate,
-    r#type::Type,
+    output_type::OutputType,
 };
 
 mod components;
 mod config;
 mod euclid;
 mod gate;
-mod r#type;
+mod output_type;
 
-pub enum Lane {
+pub enum Output {
     Gate(Gate),
     Euclid(Euclid),
 }
 
-impl Lane {
+impl Output {
     pub fn set_prob(&mut self, prob: Prob) {
         match self {
-            Lane::Gate(gate) => gate.set_prob(prob),
-            Lane::Euclid(_) => unreachable!(),
+            Output::Gate(gate) => gate.set_prob(prob),
+            Output::Euclid(_) => unreachable!(),
         }
     }
 
     pub fn set_pwm(&mut self, pwm: Pwm) {
         match self {
-            Lane::Gate(gate) => gate.set_pwm(pwm),
-            Lane::Euclid(_) => unreachable!(),
+            Output::Gate(gate) => gate.set_pwm(pwm),
+            Output::Euclid(_) => unreachable!(),
         }
     }
 
     pub fn set_rate(&mut self, rate: Rate) {
         match self {
-            Lane::Gate(gate) => gate.set_rate(rate),
-            Lane::Euclid(euclid) => euclid.set_rate(rate),
+            Output::Gate(gate) => gate.set_rate(rate),
+            Output::Euclid(euclid) => euclid.set_rate(rate),
         }
     }
 
     pub fn tick(&mut self, count: u32) {
         match self {
-            Lane::Gate(gate) => gate.tick(count),
-            Lane::Euclid(euclid) => euclid.tick(count),
+            Output::Gate(gate) => gate.tick(count),
+            Output::Euclid(euclid) => euclid.tick(count),
         }
     }
 }

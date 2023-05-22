@@ -1,4 +1,4 @@
-use super::{Density, Length, Prob, Pwm, Rate, Type};
+use super::{Density, Length, OutputType, Prob, Pwm, Rate};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Config {
@@ -7,7 +7,7 @@ pub struct Config {
     pub prob: Prob,
     pub pwm: Pwm,
     pub rate: Rate,
-    pub r#type: Type,
+    pub output_type: OutputType,
 }
 
 impl Default for Config {
@@ -24,7 +24,7 @@ impl Config {
             prob: Prob::P100,
             pwm: Pwm::P50,
             rate: Rate::Unity,
-            r#type: Type::Gate,
+            output_type: OutputType::Gate,
         }
     }
 }

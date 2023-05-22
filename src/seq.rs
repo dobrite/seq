@@ -1,13 +1,13 @@
 use heapless::Vec;
 
 use crate::{
-    lane::{Config, Euclid, Gate, Lane},
-    ticks, LaneStates, Prob, Pwm, Rate,
+    output::{Config, Euclid, Gate, Output},
+    ticks, OutputStates, Prob, Pwm, Rate,
 };
 
 pub struct Seq {
     count: u32,
-    lanes: Vec<Lane, 4>,
+    outputs: Vec<Output, 4>,
 }
 
 impl Default for Seq {
@@ -19,34 +19,34 @@ impl Default for Seq {
 impl Seq {
     pub fn new(configs: Vec<Config, 4>) -> Self {
         let resolution = ticks::resolution();
-        let mut lanes = Vec::new();
-        Self::build_lanes(resolution, configs, &mut lanes);
+        let mut outputs = Vec::new();
+        Self::build_outputs(resolution, configs, &mut outputs);
 
-        Self { count: 0, lanes }
+        Self { count: 0, outputs }
     }
 
     #[cfg(test)]
     fn new_with_resolution(resolution: u32, configs: Vec<Config, 4>) -> Self {
-        let mut lanes = Vec::new();
-        Self::build_lanes(resolution, configs, &mut lanes);
+        let mut outputs = Vec::new();
+        Self::build_outputs(resolution, configs, &mut outputs);
 
-        Self { count: 0, lanes }
+        Self { count: 0, outputs }
     }
 
-    fn build_lanes(resolution: u32, configs: Vec<Config, 4>, lanes: &mut Vec<Lane, 4>) {
+    fn build_outputs(resolution: u32, configs: Vec<Config, 4>, outputs: &mut Vec<Output, 4>) {
         for idx in 0..configs.len() {
-            let lane = if idx == 0 {
-                Lane::Euclid(Euclid::new(resolution, configs[idx]))
+            let output = if idx == 0 {
+                Output::Euclid(Euclid::new(resolution, configs[idx]))
             } else {
-                Lane::Gate(Gate::new(resolution, configs[idx]))
+                Output::Gate(Gate::new(resolution, configs[idx]))
             };
-            lanes.push(lane).ok();
+            outputs.push(output).ok();
         }
     }
 
-    pub fn tick(&mut self) -> LaneStates {
-        for lane in self.lanes.iter_mut() {
-            lane.tick(self.count);
+    pub fn tick(&mut self) -> OutputStates {
+        for output in self.outputs.iter_mut() {
+            output.tick(self.count);
         }
 
         self.count += 1;
@@ -55,26 +55,26 @@ impl Seq {
     }
 
     pub fn set_prob(&mut self, index: usize, prob: Prob) {
-        self.lanes[index].set_prob(prob);
+        self.outputs[index].set_prob(prob);
     }
 
     pub fn set_pwm(&mut self, index: usize, pwm: Pwm) {
-        self.lanes[index].set_pwm(pwm);
+        self.outputs[index].set_pwm(pwm);
     }
 
     pub fn set_rate(&mut self, index: usize, rate: Rate) {
-        self.lanes[index].set_rate(rate);
+        self.outputs[index].set_rate(rate);
     }
 
-    fn state(&self) -> LaneStates {
-        self.lanes.iter().map(|lane| lane.into()).collect()
+    fn state(&self) -> OutputStates {
+        self.outputs.iter().map(|output| output.into()).collect()
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::LaneState;
+    use crate::OutputState;
 
     #[test]
     fn it_new() {
@@ -86,7 +86,7 @@ mod tests {
         let seq = Seq::new_with_resolution(resolution, configs);
         let result = seq.state();
 
-        let expected = LaneState {
+        let expected = OutputState {
             on: true,
             edge_change: false,
         };
@@ -109,7 +109,7 @@ mod tests {
         seq.tick();
         let result = seq.state();
 
-        let expected = LaneState {
+        let expected = OutputState {
             on: true,
             edge_change: false,
         };
@@ -120,7 +120,7 @@ mod tests {
         seq.tick();
         let result = seq.state();
 
-        let expected = LaneState {
+        let expected = OutputState {
             on: false,
             edge_change: true,
         };

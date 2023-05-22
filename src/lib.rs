@@ -1,32 +1,32 @@
 #![cfg_attr(not(test), no_std)]
 
 use heapless::Vec;
-pub use lane::{Config as LaneConfig, Frac, Prob, Pwm, Rate};
+pub use output::{Config as OutputConfig, Frac, Prob, Pwm, Rate};
 pub use ticks::tick_duration;
 
-use crate::lane::Lane;
+use crate::output::Output;
 pub use crate::seq::Seq;
 
-mod lane;
+mod output;
 mod seq;
 mod ticks;
 
-pub type LaneStates = Vec<LaneState, 4>;
+pub type OutputStates = Vec<OutputState, 4>;
 
 #[derive(Debug, PartialEq)]
-pub struct LaneState {
+pub struct OutputState {
     pub on: bool,
     pub edge_change: bool,
 }
 
-impl From<&Lane> for LaneState {
-    fn from(val: &Lane) -> Self {
+impl From<&Output> for OutputState {
+    fn from(val: &Output) -> Self {
         match val {
-            Lane::Gate(gate) => LaneState {
+            Output::Gate(gate) => OutputState {
                 on: gate.on,
                 edge_change: gate.edge_change,
             },
-            Lane::Euclid(euclid) => LaneState {
+            Output::Euclid(euclid) => OutputState {
                 on: euclid.on,
                 edge_change: euclid.edge_change,
             },

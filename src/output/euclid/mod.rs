@@ -1,9 +1,6 @@
 use heapless::Vec;
 
-use super::{
-    components::{Density, Length, Rate},
-    Config, Type,
-};
+use super::{components::Rate, Config, OutputType};
 
 mod sequence;
 
@@ -20,7 +17,7 @@ pub struct Euclid {
 impl Default for Euclid {
     fn default() -> Self {
         let config = Config {
-            r#type: Type::Euclid,
+            output_type: OutputType::Euclid,
             ..Default::default()
         };
 
@@ -69,7 +66,10 @@ impl Euclid {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::{
+        super::components::{Density, Length},
+        *,
+    };
 
     const ON: bool = true;
     const OFF: bool = false;
@@ -83,7 +83,7 @@ mod tests {
             density,
             length,
             rate,
-            r#type: Type::Euclid,
+            output_type: OutputType::Euclid,
             ..Default::default()
         };
         let euclid = Euclid::new(1_920, config);

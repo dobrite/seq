@@ -1,5 +1,5 @@
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Type {
+pub enum OutputType {
     Gate,
     Euclid,
 }

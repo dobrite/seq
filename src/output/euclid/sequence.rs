@@ -1,6 +1,6 @@
 use heapless::Vec;
 
-use crate::lane::euclid::{Density, Length};
+use super::super::components::{Density, Length};
 
 // This generates incorrect sequences compared to
 // PAMs and Euclidean Circles V2
