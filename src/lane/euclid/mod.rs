@@ -1,49 +1,53 @@
 use heapless::Vec;
 
-use super::components::{Density, Length, Rate};
+use super::{
+    components::{Density, Length, Rate},
+    Config, Type,
+};
 
 mod sequence;
 
 #[derive(Debug, PartialEq)]
 pub struct Euclid {
+    config: Config,
     cycle_target: u32,
-    density: Density,
-    length: Length,
     pub(crate) edge_change: bool,
     pub(crate) on: bool,
-    rate: Rate,
     resolution: u32,
     sequence: Vec<bool, 16>,
 }
 
 impl Default for Euclid {
     fn default() -> Self {
-        Self::new(1_920, Rate::Unity, Density(4), Length(16))
+        let config = Config {
+            r#type: Type::Euclid,
+            ..Default::default()
+        };
+
+        Self::new(1_920, config)
     }
 }
 
 impl Euclid {
-    pub fn new(resolution: u32, rate: Rate, density: Density, length: Length) -> Self {
+    pub fn new(resolution: u32, config: Config) -> Self {
         let mut sequence: Vec<bool, 16> = Vec::new();
         for _ in 0..16 {
             sequence.push(false).unwrap();
         }
-        sequence::fill(density, length, &mut sequence);
+        sequence::fill(config.density, config.length, &mut sequence);
 
         Self {
+            config,
             cycle_target: 1_920,
-            density,
             edge_change: false,
-            length,
             on: true,
-            rate,
             resolution,
             sequence,
         }
     }
 
     pub fn set_rate(&mut self, rate: Rate) {
-        self.rate = rate;
+        self.config.rate = rate;
     }
 
     #[allow(dead_code)]
@@ -55,7 +59,7 @@ impl Euclid {
         }
 
         if count % self.cycle_target == 0 {
-            let index = count / self.cycle_target % self.length.0;
+            let index = count / self.cycle_target % self.config.length.0;
             self.on = self.sequence[index as usize];
         }
 
@@ -75,7 +79,14 @@ mod tests {
         let rate = Rate::Unity;
         let density = Density(4);
         let length = Length(16);
-        let euclid = Euclid::new(1_920, rate, density, length);
+        let config = Config {
+            density,
+            length,
+            rate,
+            r#type: Type::Euclid,
+            ..Default::default()
+        };
+        let euclid = Euclid::new(1_920, config);
         let mut sequence: Vec<bool, 16> = Vec::new();
         for _ in 0..16 {
             sequence.push(false).unwrap();
@@ -83,12 +94,10 @@ mod tests {
         sequence::fill(density, length, &mut sequence);
 
         let expected = Euclid {
+            config,
             cycle_target: 1_920,
-            density,
             edge_change: false,
-            length,
             on: true,
-            rate,
             resolution: 1_920,
             sequence,
         };
@@ -98,7 +107,7 @@ mod tests {
 
     #[test]
     fn it_updates_on_at_length_sixteen_at_density_four() {
-        let mut euclid = Euclid::new(1_920, Rate::Unity, Density(4), Length(16));
+        let mut euclid = Euclid::new(1_920, Default::default());
 
         euclid.tick(0);
         assert_eq!(ON, euclid.on);
@@ -154,7 +163,7 @@ mod tests {
 
     #[test]
     fn it_updates_edge_change_at_length_sixteen_at_density_four() {
-        let mut euclid = Euclid::new(1_920, Rate::Unity, Density(4), Length(16));
+        let mut euclid = Euclid::new(1_920, Default::default());
 
         assert_eq!(OFF, euclid.edge_change);
         euclid.tick(0);
