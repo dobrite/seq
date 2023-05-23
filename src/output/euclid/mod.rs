@@ -1,6 +1,6 @@
 use heapless::Vec;
 
-use super::{components::Rate, Config, OutputType};
+use super::{components::Rate, Config, Density, Length, OutputType};
 
 mod sequence;
 
@@ -45,6 +45,17 @@ impl Euclid {
 
     pub fn set_rate(&mut self, rate: Rate) {
         self.config.rate = rate;
+    }
+
+    pub fn set_length(&mut self, length: Length) {
+        self.config.length = length;
+        self.sequence.truncate(length.0 as usize);
+        sequence::fill(self.config.density, self.config.length, &mut self.sequence);
+    }
+
+    pub fn set_density(&mut self, density: Density) {
+        self.config.density = density;
+        sequence::fill(self.config.density, self.config.length, &mut self.sequence);
     }
 
     #[allow(dead_code)]

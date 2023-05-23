@@ -39,6 +39,20 @@ impl Output {
         }
     }
 
+    pub fn set_length(&mut self, length: Length) {
+        match self {
+            Output::Gate(_) => unreachable!(),
+            Output::Euclid(euclid) => euclid.set_length(length),
+        }
+    }
+
+    pub fn set_density(&mut self, density: Density) {
+        match self {
+            Output::Gate(_) => unreachable!(),
+            Output::Euclid(euclid) => euclid.set_density(density),
+        }
+    }
+
     pub fn tick(&mut self, count: u32) {
         match self {
             Output::Gate(gate) => gate.tick(count),

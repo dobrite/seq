@@ -8,7 +8,7 @@ pub fn fill(d: Density, l: Length, sequence: &mut Vec<bool, 16>) {
     let density = d.0 as i32;
     let length = l.0 as i32;
 
-    assert!(sequence.len() == 16);
+    assert!(sequence.len() == l.0 as usize);
     assert!(density <= length);
 
     // Hardcode this until I circle back to fix the algo

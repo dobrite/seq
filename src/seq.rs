@@ -1,7 +1,7 @@
 use heapless::Vec;
 
 use crate::{
-    output::{Config, Euclid, Gate, Output, OutputType},
+    output::{Config, Density, Euclid, Gate, Length, Output, OutputType},
     ticks, OutputStates, Prob, Pwm, Rate,
 };
 
@@ -63,6 +63,14 @@ impl Seq {
 
     pub fn set_rate(&mut self, index: usize, rate: Rate) {
         self.outputs[index].set_rate(rate);
+    }
+
+    pub fn set_length(&mut self, index: usize, length: Length) {
+        self.outputs[index].set_length(length);
+    }
+
+    pub fn set_density(&mut self, index: usize, density: Density) {
+        self.outputs[index].set_density(density);
     }
 
     fn state(&self) -> OutputStates {
