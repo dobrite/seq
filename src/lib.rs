@@ -1,7 +1,7 @@
 #![cfg_attr(not(test), no_std)]
 
 use heapless::Vec;
-pub use output::{Config as OutputConfig, Frac, OutputType, Prob, Pwm, Rate};
+pub use output::{Config as OutputConfig, Density, Frac, Length, OutputType, Prob, Pwm, Rate};
 pub use ticks::tick_duration;
 
 use crate::output::Output;
