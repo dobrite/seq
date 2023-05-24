@@ -19,28 +19,26 @@ impl Default for Seq {
 impl Seq {
     pub fn new(configs: Vec<Config, 4>) -> Self {
         let resolution = ticks::resolution();
-        let mut outputs = Vec::new();
-        Self::build_outputs(resolution, configs, &mut outputs);
+        let outputs = Self::build_outputs(resolution, configs);
 
         Self { count: 0, outputs }
     }
 
     #[cfg(test)]
     fn new_with_resolution(resolution: u32, configs: Vec<Config, 4>) -> Self {
-        let mut outputs = Vec::new();
-        Self::build_outputs(resolution, configs, &mut outputs);
+        let outputs = Self::build_outputs(resolution, configs);
 
         Self { count: 0, outputs }
     }
 
-    fn build_outputs(resolution: u32, configs: Vec<Config, 4>, outputs: &mut Vec<Output, 4>) {
-        for idx in 0..configs.len() {
-            let output = match configs[idx].output_type {
-                OutputType::Gate => Output::Gate(Gate::new(resolution, configs[idx])),
-                OutputType::Euclid => Output::Euclid(Euclid::new(resolution, configs[idx])),
-            };
-            outputs.push(output).ok();
-        }
+    fn build_outputs(resolution: u32, configs: Vec<Config, 4>) -> Vec<Output, 4> {
+        configs
+            .iter()
+            .map(|config| match config.output_type {
+                OutputType::Gate => Output::Gate(Gate::new(resolution, *config)),
+                OutputType::Euclid => Output::Euclid(Euclid::new(resolution, *config)),
+            })
+            .collect()
     }
 
     pub fn tick(&mut self) -> OutputStates {
