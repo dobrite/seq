@@ -103,6 +103,11 @@ impl Output {
         self.edge_change = initial_on != self.on;
     }
 
+    pub fn state(&self, state: &mut OutputState) {
+        state.edge_change = self.edge_change;
+        state.on = self.on;
+    }
+
     #[inline(always)]
     fn is_cycle_starting(&self, count: u32) -> bool {
         count % self.cycle_target == 0

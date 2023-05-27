@@ -8,6 +8,7 @@ use super::{
 pub struct Seq {
     tick: Tick,
     outputs: Vec<Output, 4>,
+    output_states: OutputStates,
 }
 
 impl Default for Seq {
@@ -23,9 +24,17 @@ impl Seq {
 
     fn new_with_resolution(resolution: u32, bpm: u32, configs: Vec<Config, 4>) -> Self {
         let tick = Tick::new(bpm as f32);
+        let mut output_states = Vec::new();
+        for _ in 0..configs.len() {
+            output_states.push(Default::default()).ok();
+        }
         let outputs = Self::build_outputs(resolution, configs);
 
-        Self { tick, outputs }
+        Self {
+            tick,
+            outputs,
+            output_states,
+        }
     }
 
     fn build_outputs(resolution: u32, configs: Vec<Config, 4>) -> Vec<Output, 4> {
@@ -35,9 +44,13 @@ impl Seq {
             .collect()
     }
 
-    pub fn tick(&mut self) -> OutputStates {
+    pub fn tick(&mut self) -> &OutputStates {
         for output in self.outputs.iter_mut() {
             output.tick(self.tick.count);
+        }
+
+        for (output, state) in self.outputs.iter().zip(self.output_states.iter_mut()) {
+            output.state(state);
         }
 
         self.tick.count += 1;
@@ -65,8 +78,8 @@ impl Seq {
         self.outputs[index].set_density(density);
     }
 
-    fn state(&self) -> OutputStates {
-        self.outputs.iter().map(|output| output.into()).collect()
+    fn state(&self) -> &OutputStates {
+        &self.output_states
     }
 }
 
