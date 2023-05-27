@@ -21,11 +21,9 @@ pub struct OutputState {
 
 impl From<&Output> for OutputState {
     fn from(val: &Output) -> Self {
-        match val {
-            Output::Gate(gate) => OutputState {
-                on: gate.on,
-                edge_change: gate.edge_change,
-            },
+        OutputState {
+            on: val.on,
+            edge_change: val.edge_change,
         }
     }
 }
