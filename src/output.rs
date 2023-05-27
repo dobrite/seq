@@ -1,10 +1,12 @@
 pub use self::{
     components::{euclid, Density, Frac, Length, OutputType, Prob, Pwm, Rate, Rng},
     config::Config,
+    output_state::{OutputState, OutputStates},
 };
 
 mod components;
 mod config;
+mod output_state;
 
 use heapless::Vec;
 

@@ -1,10 +1,6 @@
 use heapless::Vec;
 
-use crate::{
-    output::{Config, Density, Length, Output},
-    tick::RESOLUTION,
-    OutputStates, Prob, Pwm, Rate,
-};
+use super::{output::*, tick::RESOLUTION};
 
 pub struct Seq {
     count: u32,
@@ -76,7 +72,6 @@ impl Seq {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::OutputState;
 
     #[test]
     fn it_new() {
