@@ -5,33 +5,34 @@ const MICRO_SECONDS_PER_SECOND: f32 = 1_000_000.0;
 pub const RESOLUTION: u32 = PWM_PERCENT_INCREMENTS * MAX_MULT;
 
 pub struct Tick {
-    bpm: f32,
+    bpm: u32,
     pub count: u32,
-    pub tick_duration_micros: u64,
+    pub duration_micros: u64,
 }
 
 impl Tick {
-    pub fn new(bpm: f32) -> Self {
+    pub fn new(bpm: u32) -> Self {
         let mut tick = Self {
             count: 0,
             bpm,
-            tick_duration_micros: 0,
+            duration_micros: 0,
         };
 
         tick.set_bpm(bpm);
         tick
     }
 
-    pub fn set_bpm(&mut self, bpm: f32) {
+    pub fn set_bpm(&mut self, bpm: u32) {
         self.bpm = bpm;
-        self.tick_duration_micros = duration_micros(bpm);
+        self.duration_micros = self.duration_micros(bpm);
     }
-}
 
-fn duration_micros(bpm: f32) -> u64 {
-    let beats_per_second = bpm / SECONDS_IN_MINUTES;
-    let ticks_per_second = beats_per_second * RESOLUTION as f32;
-    round(MICRO_SECONDS_PER_SECOND / ticks_per_second) as u64
+    fn duration_micros(&self, bpm: u32) -> u64 {
+        let beats_per_minute = bpm as f32;
+        let beats_per_second = beats_per_minute / SECONDS_IN_MINUTES;
+        let ticks_per_second = beats_per_second * RESOLUTION as f32;
+        round(MICRO_SECONDS_PER_SECOND / ticks_per_second) as u64
+    }
 }
 
 #[inline(always)]
@@ -60,7 +61,8 @@ mod tests {
     #[test]
     fn it_computes_tick_duration_in_millis_for_10_bpm() {
         let expected = 3_125;
-        let result = duration_micros(10.0);
+        let tick = Tick::new(10);
+        let result = tick.duration_micros;
 
         assert_eq!(expected, result);
     }
@@ -68,7 +70,8 @@ mod tests {
     #[test]
     fn it_computes_tick_duration_in_millis_for_120_bpm() {
         let expected = 260;
-        let result = duration_micros(120.0);
+        let tick = Tick::new(120);
+        let result = tick.duration_micros;
 
         assert_eq!(expected, result);
     }
@@ -76,7 +79,8 @@ mod tests {
     #[test]
     fn it_computes_tick_duration_in_millis_for_300_bpm() {
         let expected = 104;
-        let result = duration_micros(300.0);
+        let tick = Tick::new(300);
+        let result = tick.duration_micros;
 
         assert_eq!(expected, result);
     }

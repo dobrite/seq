@@ -23,7 +23,7 @@ impl Seq {
     }
 
     fn new_with_resolution(resolution: u32, bpm: u32, configs: Vec<Config, 4>) -> Self {
-        let tick = Tick::new(bpm as f32);
+        let tick = Tick::new(bpm);
         let mut output_states = Vec::new();
         for _ in 0..configs.len() {
             output_states.push(Default::default()).ok();
@@ -45,7 +45,7 @@ impl Seq {
     }
 
     pub fn tick_duration_micros(&self) -> u64 {
-        self.tick.tick_duration_micros
+        self.tick.duration_micros
     }
 
     pub fn tick(&mut self) -> &OutputStates {
@@ -63,7 +63,7 @@ impl Seq {
     }
 
     pub fn set_bpm(&mut self, bpm: u32) {
-        self.tick.set_bpm(bpm as f32);
+        self.tick.set_bpm(bpm);
     }
 
     pub fn set_prob(&mut self, index: usize, prob: Prob) {
