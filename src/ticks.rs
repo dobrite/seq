@@ -3,6 +3,16 @@ const PWM_PERCENT_INCREMENTS: u32 = 10;
 const SECONDS_IN_MINUTES: f32 = 60.0;
 const MICRO_SECONDS_PER_SECOND: f32 = 1_000_000.0;
 
+pub fn resolution() -> u32 {
+    PWM_PERCENT_INCREMENTS * MAX_MULT
+}
+
+pub fn tick_duration_micros(bpm: f32) -> u64 {
+    let beats_per_second = bpm / SECONDS_IN_MINUTES;
+    let ticks_per_second = beats_per_second * resolution() as f32;
+    round(MICRO_SECONDS_PER_SECOND / ticks_per_second) as u64
+}
+
 #[inline(always)]
 fn round(val: f32) -> f32 {
     let floor = val as u32 as f32;
@@ -12,16 +22,6 @@ fn round(val: f32) -> f32 {
     } else {
         floor + 1.0
     }
-}
-
-pub fn resolution() -> u32 {
-    PWM_PERCENT_INCREMENTS * MAX_MULT
-}
-
-pub fn tick_duration_micros(bpm: f32) -> u64 {
-    let beats_per_second = bpm / SECONDS_IN_MINUTES;
-    let ticks_per_second = beats_per_second * resolution() as f32;
-    round(MICRO_SECONDS_PER_SECOND / ticks_per_second) as u64
 }
 
 #[cfg(test)]
