@@ -1,21 +1,27 @@
-use fugit::RateExtU32;
-
-const MICRO_SECONDS_PER_SECOND: u32 = 1_000_000;
-type MicroSeconds = fugit::Duration<u64, 1, MICRO_SECONDS_PER_SECOND>;
-
 const MAX_MULT: u32 = 192;
 const PWM_PERCENT_INCREMENTS: u32 = 10;
 const SECONDS_IN_MINUTES: f32 = 60.0;
+const MICRO_SECONDS_PER_SECOND: f32 = 1_000_000.0;
+
+#[inline(always)]
+fn round(val: f32) -> f32 {
+    let floor = val as u32 as f32;
+
+    if val - floor < 0.5 {
+        floor
+    } else {
+        floor + 1.0
+    }
+}
 
 pub fn resolution() -> u32 {
     PWM_PERCENT_INCREMENTS * MAX_MULT
 }
 
-pub fn tick_duration(bpm: f32) -> MicroSeconds {
-    let bps = bpm / SECONDS_IN_MINUTES;
-    let hertz: u32 = (bps * resolution() as f32) as u32;
-
-    hertz.Hz::<1, 1>().into_duration().into()
+pub fn tick_duration(bpm: f32) -> u64 {
+    let beats_per_second = bpm / SECONDS_IN_MINUTES;
+    let ticks_per_second = beats_per_second * resolution() as f32;
+    round(MICRO_SECONDS_PER_SECOND / ticks_per_second) as u64
 }
 
 #[cfg(test)]
@@ -35,7 +41,7 @@ mod tests {
         let expected = 3_125;
         let result = tick_duration(10.0);
 
-        assert_eq!(expected, result.ticks());
+        assert_eq!(expected, result);
     }
 
     #[test]
@@ -43,7 +49,7 @@ mod tests {
         let expected = 260;
         let result = tick_duration(120.0);
 
-        assert_eq!(expected, result.ticks());
+        assert_eq!(expected, result);
     }
 
     #[test]
@@ -51,6 +57,6 @@ mod tests {
         let expected = 104;
         let result = tick_duration(300.0);
 
-        assert_eq!(expected, result.ticks());
+        assert_eq!(expected, result);
     }
 }
