@@ -18,3 +18,40 @@ pub fn tick_duration(bpm: f32) -> MicroSeconds {
 
     hertz.Hz::<1, 1>().into_duration().into()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_computes_resolution() {
+        let expected = 1_920;
+        let result = resolution();
+
+        assert_eq!(expected, result);
+    }
+
+    #[test]
+    fn it_computes_tick_duration_in_millis_for_10_bpm() {
+        let expected = 3_125;
+        let result = tick_duration(10.0);
+
+        assert_eq!(expected, result.ticks());
+    }
+
+    #[test]
+    fn it_computes_tick_duration_in_millis_for_120_bpm() {
+        let expected = 260;
+        let result = tick_duration(120.0);
+
+        assert_eq!(expected, result.ticks());
+    }
+
+    #[test]
+    fn it_computes_tick_duration_in_millis_for_300_bpm() {
+        let expected = 104;
+        let result = tick_duration(300.0);
+
+        assert_eq!(expected, result.ticks());
+    }
+}
