@@ -92,7 +92,7 @@ mod tests {
         let result = seq.state();
 
         let expected = OutputState {
-            on: true,
+            on: false,
             edge_change: false,
         };
 
@@ -116,7 +116,7 @@ mod tests {
 
         let expected = OutputState {
             on: true,
-            edge_change: false,
+            edge_change: true,
         };
 
         assert_eq!(1, result.len());

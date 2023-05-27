@@ -28,7 +28,7 @@ impl Gate {
             cycle_enabled: true,
             cycle_target: 0,
             off_target: 0,
-            on: true,
+            on: false,
             edge_change: false,
             resolution,
             rng: Rng::new(config.prob),
@@ -36,7 +36,6 @@ impl Gate {
 
         gate.calc_targets();
         gate.calc_cycle_enabled();
-        gate.calc_initial_state();
 
         gate
     }
@@ -59,14 +58,9 @@ impl Gate {
         self.cycle_enabled = self.rng.rand_bool();
     }
 
-    fn calc_initial_state(&mut self) {
-        self.on = self.cycle_enabled
-    }
-
     pub fn set_prob(&mut self, prob: Prob) {
         self.rng = Rng::new(prob);
         self.calc_cycle_enabled();
-        self.calc_initial_state();
     }
 
     pub fn set_pwm(&mut self, pwm: Pwm) {
@@ -89,7 +83,7 @@ impl Gate {
             self.on = false;
         }
 
-        self.edge_change = initial_on != self.on
+        self.edge_change = initial_on != self.on;
     }
 
     #[inline(always)]
@@ -137,7 +131,7 @@ mod tests {
             cycle_enabled: true,
             cycle_target: 1_920,
             off_target: 960,
-            on: true,
+            on: false,
             edge_change: false,
             resolution: 1_920,
             rng: Rng::new(prob),
@@ -150,7 +144,7 @@ mod tests {
     fn it_updates_on_through_two_full_cycles_at_pwm_p50() {
         let mut gate = Gate::new(1_920, Default::default());
 
-        assert_eq!(ON, gate.on);
+        assert_eq!(OFF, gate.on);
 
         gate.tick(0);
         assert_eq!(ON, gate.on);
@@ -184,8 +178,10 @@ mod tests {
     fn it_updates_edge_change_through_two_full_cycles_at_pwm_p50() {
         let mut gate = Gate::new(1_920, Default::default());
 
-        gate.tick(0);
         assert_eq!(OFF, gate.edge_change);
+
+        gate.tick(0);
+        assert_eq!(ON, gate.edge_change);
         gate.tick(1);
         assert_eq!(OFF, gate.edge_change);
         gate.tick(2);
@@ -233,6 +229,9 @@ mod tests {
         assert_eq!(480, gate.off_target);
         assert_eq!(rate, gate.config.rate);
 
+        assert_eq!(OFF, gate.on);
+
+        gate.tick(0);
         assert_eq!(ON, gate.on);
 
         gate.tick(480);
@@ -261,6 +260,9 @@ mod tests {
         assert_eq!(10_240, gate.cycle_target);
         assert_eq!(rate, gate.config.rate);
 
+        assert_eq!(OFF, gate.on);
+
+        gate.tick(0);
         assert_eq!(ON, gate.on);
 
         gate.tick(5_119);
