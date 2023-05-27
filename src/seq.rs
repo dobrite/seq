@@ -2,7 +2,8 @@ use heapless::Vec;
 
 use crate::{
     output::{Config, Density, Length, Output},
-    ticks, OutputStates, Prob, Pwm, Rate,
+    tick::RESOLUTION,
+    OutputStates, Prob, Pwm, Rate,
 };
 
 pub struct Seq {
@@ -18,8 +19,7 @@ impl Default for Seq {
 
 impl Seq {
     pub fn new(configs: Vec<Config, 4>) -> Self {
-        let resolution = ticks::resolution();
-        let outputs = Self::build_outputs(resolution, configs);
+        let outputs = Self::build_outputs(RESOLUTION, configs);
 
         Self { count: 0, outputs }
     }

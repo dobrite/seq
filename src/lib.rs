@@ -2,14 +2,13 @@
 
 use heapless::Vec;
 pub use output::{Config as OutputConfig, Density, Frac, Length, OutputType, Prob, Pwm, Rate};
-pub use ticks::tick_duration_micros;
 
 use crate::output::Output;
 pub use crate::seq::Seq;
 
 mod output;
 mod seq;
-mod ticks;
+mod tick;
 
 pub type OutputStates = Vec<OutputState, 4>;
 
