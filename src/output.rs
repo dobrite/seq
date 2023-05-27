@@ -3,6 +3,7 @@ pub use self::{
     config::Config,
     output_state::{OutputState, OutputStates},
 };
+use super::tick::RESOLUTION;
 
 mod components;
 mod config;
@@ -24,7 +25,7 @@ pub struct Output {
 
 impl Default for Output {
     fn default() -> Self {
-        Self::new(1_920, Default::default())
+        Self::new(RESOLUTION, Default::default())
     }
 }
 
