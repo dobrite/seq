@@ -44,6 +44,10 @@ impl Seq {
             .collect()
     }
 
+    pub fn tick_duration_micros(&self) -> u64 {
+        self.tick.tick_duration_micros
+    }
+
     pub fn tick(&mut self) -> &OutputStates {
         for output in self.outputs.iter_mut() {
             output.tick(self.tick.count);
@@ -56,6 +60,10 @@ impl Seq {
         self.tick.count += 1;
 
         self.state()
+    }
+
+    pub fn set_bpm(&mut self, bpm: u32) {
+        self.tick.set_bpm(bpm as f32);
     }
 
     pub fn set_prob(&mut self, index: usize, prob: Prob) {
