@@ -13,8 +13,7 @@ pub fn resolution() -> u32 {
 
 pub fn tick_duration(bpm: f32) -> MicroSeconds {
     let bps = bpm / SECONDS_IN_MINUTES;
-    const MULTIPLYER: f32 = (PWM_PERCENT_INCREMENTS * MAX_MULT) as f32;
-    let hertz: u32 = (bps * MULTIPLYER) as u32;
+    let hertz: u32 = (bps * resolution() as f32) as u32;
 
     hertz.Hz::<1, 1>().into_duration().into()
 }
