@@ -5,9 +5,15 @@ const MICRO_SECONDS_PER_SECOND: f32 = 1_000_000.0;
 pub const RESOLUTION: u32 = PWM_PERCENT_INCREMENTS * MAX_MULT;
 
 pub struct Tick {
-    bpm: u32,
+    pub bpm: u32,
     pub count: u32,
     pub duration_micros: u64,
+}
+
+impl Default for Tick {
+    fn default() -> Self {
+        Self::new(120)
+    }
 }
 
 impl Tick {
