@@ -1,18 +1,20 @@
+use heapless::Vec;
+
 use super::{
-    components::{Prob, Pwm, Rate, Rng},
+    components::{euclid, Density, Length, OutputType, Prob, Pwm, Rate, Rng},
     Config,
 };
 
 #[derive(Debug, PartialEq)]
 pub struct Gate {
     config: Config,
-    cycle_enabled: bool,
     cycle_target: u32,
     off_target: u32,
     pub(crate) on: bool,
     pub(crate) edge_change: bool,
     resolution: u32,
     rng: Rng,
+    sequence: Vec<bool, 16>,
 }
 
 impl Default for Gate {
@@ -23,19 +25,24 @@ impl Default for Gate {
 
 impl Gate {
     pub fn new(resolution: u32, config: Config) -> Self {
+        let mut sequence: Vec<bool, 16> = Vec::new();
+        for _ in 0..16 {
+            sequence.push(false).unwrap();
+        }
+        euclid(config.density, config.length, &mut sequence);
+
         let mut gate = Self {
             config,
-            cycle_enabled: true,
             cycle_target: 0,
             off_target: 0,
             on: false,
             edge_change: false,
             resolution,
             rng: Rng::new(config.prob),
+            sequence,
         };
 
         gate.calc_targets();
-        gate.calc_cycle_enabled();
 
         gate
     }
@@ -54,13 +61,8 @@ impl Gate {
         self.off_target = (ratio * self.cycle_target as f32) as u32
     }
 
-    fn calc_cycle_enabled(&mut self) {
-        self.cycle_enabled = self.rng.rand_bool();
-    }
-
     pub fn set_prob(&mut self, prob: Prob) {
         self.rng = Rng::new(prob);
-        self.calc_cycle_enabled();
     }
 
     pub fn set_pwm(&mut self, pwm: Pwm) {
@@ -73,13 +75,23 @@ impl Gate {
         self.calc_targets();
     }
 
+    pub fn set_length(&mut self, length: Length) {
+        self.config.length = length;
+        self.sequence.truncate(length.0 as usize);
+        euclid(self.config.density, self.config.length, &mut self.sequence);
+    }
+
+    pub fn set_density(&mut self, density: Density) {
+        self.config.density = density;
+        euclid(self.config.density, self.config.length, &mut self.sequence);
+    }
+
     pub fn tick(&mut self, count: u32) {
         let initial_on = self.on;
 
-        if self.turn_on(count) {
-            self.calc_cycle_enabled();
-            self.on = self.cycle_enabled;
-        } else if self.turn_off(count) {
+        if self.is_cycle_starting(count) {
+            self.on = self.is_on(count);
+        } else if self.is_cycle_finished(count) {
             self.on = false;
         }
 
@@ -87,13 +99,27 @@ impl Gate {
     }
 
     #[inline(always)]
-    fn turn_on(&self, count: u32) -> bool {
+    fn is_cycle_starting(&self, count: u32) -> bool {
         count % self.cycle_target == 0
     }
 
     #[inline(always)]
-    fn turn_off(&self, count: u32) -> bool {
-        count % self.off_target == 0
+    fn is_on(&mut self, count: u32) -> bool {
+        match self.config.output_type {
+            OutputType::Gate => self.rng.rand_bool(),
+            OutputType::Euclid => {
+                let index = count / self.cycle_target % self.config.length.0;
+                self.sequence[index as usize]
+            }
+        }
+    }
+
+    #[inline(always)]
+    fn is_cycle_finished(&self, count: u32) -> bool {
+        match self.config.output_type {
+            OutputType::Gate => count % self.off_target == 0,
+            OutputType::Euclid => true,
+        }
     }
 }
 
@@ -123,18 +149,23 @@ mod tests {
             pwm,
             rate,
         };
+        let mut sequence: Vec<bool, 16> = Vec::new();
+        for _ in 0..16 {
+            sequence.push(false).unwrap();
+        }
+        euclid(config.density, config.length, &mut sequence);
 
         let gate = Gate::new(1_920, config);
 
         let expected = Gate {
             config,
-            cycle_enabled: true,
             cycle_target: 1_920,
             off_target: 960,
             on: false,
             edge_change: false,
             resolution: 1_920,
             rng: Rng::new(prob),
+            sequence,
         };
 
         assert_eq!(expected, gate);
@@ -311,5 +342,115 @@ mod tests {
         };
         let mut gate = Gate::new(1_920, config);
         gate.tick(1);
+    }
+
+    #[test]
+    fn it_updates_on_at_length_sixteen_at_density_four() {
+        let mut euclid = Gate::new(
+            1_920,
+            Config {
+                output_type: OutputType::Euclid,
+                ..Default::default()
+            },
+        );
+
+        euclid.tick(0);
+        assert_eq!(ON, euclid.on);
+
+        euclid.tick(1_920);
+        assert_eq!(OFF, euclid.on);
+
+        euclid.tick(1_920 * 2);
+        assert_eq!(OFF, euclid.on);
+
+        euclid.tick(1_920 * 3);
+        assert_eq!(OFF, euclid.on);
+
+        euclid.tick(1_920 * 4);
+        assert_eq!(ON, euclid.on);
+
+        euclid.tick(1_920 * 5);
+        assert_eq!(OFF, euclid.on);
+
+        euclid.tick(1_920 * 6);
+        assert_eq!(OFF, euclid.on);
+
+        euclid.tick(1_920 * 7);
+        assert_eq!(OFF, euclid.on);
+
+        euclid.tick(1_920 * 8);
+        assert_eq!(ON, euclid.on);
+
+        euclid.tick(1_920 * 9);
+        assert_eq!(OFF, euclid.on);
+
+        euclid.tick(1_920 * 10);
+        assert_eq!(OFF, euclid.on);
+
+        euclid.tick(1_920 * 11);
+        assert_eq!(OFF, euclid.on);
+
+        euclid.tick(1_920 * 12);
+        assert_eq!(ON, euclid.on);
+
+        euclid.tick(1_920 * 13);
+        assert_eq!(OFF, euclid.on);
+
+        euclid.tick(1_920 * 14);
+        assert_eq!(OFF, euclid.on);
+
+        euclid.tick(1_920 * 15);
+        assert_eq!(OFF, euclid.on);
+
+        euclid.tick(1_920 * 16);
+        assert_eq!(ON, euclid.on);
+    }
+
+    #[test]
+    fn it_updates_edge_change_at_length_sixteen_at_density_four() {
+        let mut euclid = Gate::new(
+            1_920,
+            Config {
+                output_type: OutputType::Euclid,
+                ..Default::default()
+            },
+        );
+
+        assert_eq!(OFF, euclid.edge_change);
+
+        euclid.tick(0);
+        assert_eq!(ON, euclid.edge_change);
+        euclid.tick(1);
+        assert_eq!(ON, euclid.edge_change);
+        euclid.tick(2);
+        assert_eq!(OFF, euclid.edge_change);
+
+        euclid.tick(1_919);
+        assert_eq!(OFF, euclid.edge_change);
+        euclid.tick(1_920);
+        assert_eq!(OFF, euclid.edge_change);
+        euclid.tick(1_921);
+        assert_eq!(OFF, euclid.edge_change);
+
+        euclid.tick(3_839);
+        assert_eq!(OFF, euclid.edge_change);
+        euclid.tick(3_840);
+        assert_eq!(OFF, euclid.edge_change);
+        euclid.tick(3_841);
+        assert_eq!(OFF, euclid.edge_change);
+
+        euclid.tick(5_759);
+        assert_eq!(OFF, euclid.edge_change);
+        euclid.tick(5_760);
+        assert_eq!(OFF, euclid.edge_change);
+        euclid.tick(5_761);
+        assert_eq!(OFF, euclid.edge_change);
+
+        euclid.tick(7_679);
+        assert_eq!(OFF, euclid.edge_change);
+        euclid.tick(7_680);
+        assert_eq!(ON, euclid.edge_change);
+        euclid.tick(7_681);
+        assert_eq!(ON, euclid.edge_change);
     }
 }

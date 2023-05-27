@@ -1,10 +1,10 @@
 use heapless::Vec;
 
-use super::super::components::{Density, Length};
+use super::{Density, Length};
 
 // This generates incorrect sequences compared to
 // PAMs and Euclidean Circles V2
-pub fn fill(d: Density, l: Length, sequence: &mut Vec<bool, 16>) {
+pub fn euclid(d: Density, l: Length, sequence: &mut Vec<bool, 16>) {
     let density = d.0 as i32;
     let length = l.0 as i32;
 
@@ -64,7 +64,7 @@ mod tests {
         ])
         .unwrap();
 
-        fill(density, length, &mut result);
+        euclid(density, length, &mut result);
 
         assert_eq!(expected, result);
     }
@@ -87,7 +87,7 @@ mod tests {
         ])
         .unwrap();
 
-        fill(density, length, &mut result);
+        euclid(density, length, &mut result);
 
         assert_eq!(expected, result);
     }

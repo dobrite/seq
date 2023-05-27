@@ -1,7 +1,7 @@
 use heapless::Vec;
 
 use crate::{
-    output::{Config, Density, Euclid, Gate, Length, Output, OutputType},
+    output::{Config, Density, Gate, Length, Output},
     ticks, OutputStates, Prob, Pwm, Rate,
 };
 
@@ -34,10 +34,7 @@ impl Seq {
     fn build_outputs(resolution: u32, configs: Vec<Config, 4>) -> Vec<Output, 4> {
         configs
             .iter()
-            .map(|config| match config.output_type {
-                OutputType::Gate => Output::Gate(Gate::new(resolution, *config)),
-                OutputType::Euclid => Output::Euclid(Euclid::new(resolution, *config)),
-            })
+            .map(|config| Output::Gate(Gate::new(resolution, *config)))
             .collect()
     }
 

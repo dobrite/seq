@@ -26,10 +26,6 @@ impl From<&Output> for OutputState {
                 on: gate.on,
                 edge_change: gate.edge_change,
             },
-            Output::Euclid(euclid) => OutputState {
-                on: euclid.on,
-                edge_change: euclid.edge_change,
-            },
         }
     }
 }
