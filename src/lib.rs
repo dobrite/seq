@@ -2,7 +2,7 @@
 
 use heapless::Vec;
 pub use output::{Config as OutputConfig, Density, Frac, Length, OutputType, Prob, Pwm, Rate};
-pub use ticks::tick_duration;
+pub use ticks::tick_duration_micros;
 
 use crate::output::Output;
 pub use crate::seq::Seq;

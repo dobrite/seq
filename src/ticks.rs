@@ -18,7 +18,7 @@ pub fn resolution() -> u32 {
     PWM_PERCENT_INCREMENTS * MAX_MULT
 }
 
-pub fn tick_duration(bpm: f32) -> u64 {
+pub fn tick_duration_micros(bpm: f32) -> u64 {
     let beats_per_second = bpm / SECONDS_IN_MINUTES;
     let ticks_per_second = beats_per_second * resolution() as f32;
     round(MICRO_SECONDS_PER_SECOND / ticks_per_second) as u64
@@ -39,7 +39,7 @@ mod tests {
     #[test]
     fn it_computes_tick_duration_in_millis_for_10_bpm() {
         let expected = 3_125;
-        let result = tick_duration(10.0);
+        let result = tick_duration_micros(10.0);
 
         assert_eq!(expected, result);
     }
@@ -47,7 +47,7 @@ mod tests {
     #[test]
     fn it_computes_tick_duration_in_millis_for_120_bpm() {
         let expected = 260;
-        let result = tick_duration(120.0);
+        let result = tick_duration_micros(120.0);
 
         assert_eq!(expected, result);
     }
@@ -55,7 +55,7 @@ mod tests {
     #[test]
     fn it_computes_tick_duration_in_millis_for_300_bpm() {
         let expected = 104;
-        let result = tick_duration(300.0);
+        let result = tick_duration_micros(300.0);
 
         assert_eq!(expected, result);
     }
