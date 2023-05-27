@@ -82,20 +82,24 @@ impl Gate {
     pub fn tick(&mut self, count: u32) {
         let initial_on = self.on;
 
-        let cycle_mod = count % self.cycle_target;
-        if cycle_mod % self.cycle_target == 0 {
+        if self.turn_on(count) {
             self.calc_cycle_enabled();
             self.on = self.cycle_enabled;
-            self.edge_change = initial_on != self.on;
-            return;
-        }
-
-        let off_mod = count % self.off_target;
-        if off_mod % self.off_target == 0 {
+        } else if self.turn_off(count) {
             self.on = false;
         }
 
-        self.edge_change = initial_on != self.on;
+        self.edge_change = initial_on != self.on
+    }
+
+    #[inline(always)]
+    fn turn_on(&self, count: u32) -> bool {
+        count % self.cycle_target == 0
+    }
+
+    #[inline(always)]
+    fn turn_off(&self, count: u32) -> bool {
+        count % self.off_target == 0
     }
 }
 
