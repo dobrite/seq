@@ -1,30 +1,31 @@
 use heapless::Vec;
 
-use super::{output::*, tick::RESOLUTION};
+use super::{
+    output::*,
+    tick::{Tick, RESOLUTION},
+};
 
 pub struct Seq {
-    count: u32,
+    tick: Tick,
     outputs: Vec<Output, 4>,
 }
 
 impl Default for Seq {
     fn default() -> Self {
-        Self::new(Default::default())
+        Self::new(120, Default::default())
     }
 }
 
 impl Seq {
-    pub fn new(configs: Vec<Config, 4>) -> Self {
-        let outputs = Self::build_outputs(RESOLUTION, configs);
-
-        Self { count: 0, outputs }
+    pub fn new(bpm: u32, configs: Vec<Config, 4>) -> Self {
+        Seq::new_with_resolution(RESOLUTION, bpm, configs)
     }
 
-    #[cfg(test)]
-    fn new_with_resolution(resolution: u32, configs: Vec<Config, 4>) -> Self {
+    fn new_with_resolution(resolution: u32, bpm: u32, configs: Vec<Config, 4>) -> Self {
+        let tick = Tick::new(bpm as f32);
         let outputs = Self::build_outputs(resolution, configs);
 
-        Self { count: 0, outputs }
+        Self { tick, outputs }
     }
 
     fn build_outputs(resolution: u32, configs: Vec<Config, 4>) -> Vec<Output, 4> {
@@ -36,10 +37,10 @@ impl Seq {
 
     pub fn tick(&mut self) -> OutputStates {
         for output in self.outputs.iter_mut() {
-            output.tick(self.count);
+            output.tick(self.tick.count);
         }
 
-        self.count += 1;
+        self.tick.count += 1;
 
         self.state()
     }
@@ -80,7 +81,7 @@ mod tests {
         for _ in 0..4 {
             configs.push(Default::default()).unwrap();
         }
-        let seq = Seq::new_with_resolution(resolution, configs);
+        let seq = Seq::new_with_resolution(resolution, 120, configs);
         let result = seq.state();
 
         let expected = OutputState {
@@ -102,7 +103,8 @@ mod tests {
         for _ in 0..1 {
             configs.push(Default::default()).unwrap();
         }
-        let mut seq = Seq::new_with_resolution(resolution, configs);
+        let mut seq = Seq::new_with_resolution(resolution, 120, configs);
+
         seq.tick();
         let result = seq.state();
 
