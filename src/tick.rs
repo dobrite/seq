@@ -1,3 +1,5 @@
+use super::maff;
+
 const MAX_MULT: u32 = 192;
 const PWM_PERCENT_INCREMENTS: u32 = 10;
 const SECONDS_IN_MINUTES: f32 = 60.0;
@@ -37,18 +39,7 @@ impl Tick {
         let beats_per_minute = bpm as f32;
         let beats_per_second = beats_per_minute / SECONDS_IN_MINUTES;
         let ticks_per_second = beats_per_second * RESOLUTION as f32;
-        round(MICRO_SECONDS_PER_SECOND / ticks_per_second) as u64
-    }
-}
-
-#[inline(always)]
-fn round(val: f32) -> f32 {
-    let floor = val as u32 as f32;
-
-    if val - floor < 0.5 {
-        floor
-    } else {
-        floor + 1.0
+        maff::round(MICRO_SECONDS_PER_SECOND / ticks_per_second) as u64
     }
 }
 
