@@ -4,7 +4,7 @@ pub use output::{Config as OutputConfig, Density, Frac, Length, OutputType, Prob
 
 pub use crate::seq::Seq;
 
-mod maff;
+mod math;
 mod output;
 mod seq;
 mod tick;
