@@ -28,20 +28,16 @@ impl Seq {
         for _ in 0..configs.len() {
             output_states.push(Default::default()).ok();
         }
-        let outputs = Self::build_outputs(resolution, configs);
+        let outputs = configs
+            .iter()
+            .map(|config| Output::new(resolution, &tick, *config))
+            .collect();
 
         Self {
             tick,
             outputs,
             output_states,
         }
-    }
-
-    fn build_outputs(resolution: u32, configs: Vec<Config, 4>) -> Vec<Output, 4> {
-        configs
-            .iter()
-            .map(|config| Output::new(resolution, *config))
-            .collect()
     }
 
     pub fn tick_duration_micros(&self) -> u64 {
@@ -71,11 +67,11 @@ impl Seq {
     }
 
     pub fn set_pwm(&mut self, index: usize, pwm: Pwm) {
-        self.outputs[index].set_pwm(pwm);
+        self.outputs[index].set_pwm(&self.tick, pwm);
     }
 
     pub fn set_rate(&mut self, index: usize, rate: Rate) {
-        self.outputs[index].set_rate(rate);
+        self.outputs[index].set_rate(&self.tick, rate);
     }
 
     pub fn set_length(&mut self, index: usize, length: Length) {

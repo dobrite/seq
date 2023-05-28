@@ -3,7 +3,7 @@ pub use self::{
     config::Config,
     output_state::{OutputState, OutputStates},
 };
-use super::tick::RESOLUTION;
+use super::tick::{Tick, RESOLUTION};
 
 mod components;
 mod config;
@@ -25,12 +25,12 @@ pub struct Output {
 
 impl Default for Output {
     fn default() -> Self {
-        Self::new(RESOLUTION, Default::default())
+        Self::new(RESOLUTION, &Tick::new(120), Default::default())
     }
 }
 
 impl Output {
-    pub fn new(resolution: u32, config: Config) -> Self {
+    pub fn new(resolution: u32, tick: &Tick, config: Config) -> Self {
         let mut sequence: Vec<bool, 16> = Vec::new();
         for _ in 0..16 {
             sequence.push(false).unwrap();
@@ -48,37 +48,36 @@ impl Output {
             sequence,
         };
 
-        output.calc_targets();
+        output.calc_targets(tick);
 
         output
     }
 
-    fn calc_targets(&mut self) {
+    fn calc_targets(&mut self, tick: &Tick) {
         self.calc_cycle_target();
-        self.calc_off_target();
+        self.calc_off_target(tick);
     }
 
     fn calc_cycle_target(&mut self) {
         self.cycle_target = (Into::<f32>::into(self.config.rate) * self.resolution as f32) as u32
     }
 
-    fn calc_off_target(&mut self) {
-        let ratio: f32 = self.config.pwm.into();
-        self.off_target = (ratio * self.cycle_target as f32) as u32
+    fn calc_off_target(&mut self, tick: &Tick) {
+        self.off_target = self.config.pwm.off_target(tick, self.cycle_target)
     }
 
     pub fn set_prob(&mut self, prob: Prob) {
         self.rng = Rng::new(prob);
     }
 
-    pub fn set_pwm(&mut self, pwm: Pwm) {
+    pub fn set_pwm(&mut self, tick: &Tick, pwm: Pwm) {
         self.config.pwm = pwm;
-        self.calc_targets();
+        self.calc_targets(tick);
     }
 
-    pub fn set_rate(&mut self, rate: Rate) {
+    pub fn set_rate(&mut self, tick: &Tick, rate: Rate) {
         self.config.rate = rate;
-        self.calc_targets();
+        self.calc_targets(tick);
     }
 
     pub fn set_length(&mut self, length: Length) {
@@ -163,7 +162,7 @@ mod tests {
         }
         euclid(config.density, config.length, &mut sequence);
 
-        let output = Output::new(1_920, config);
+        let output = Output::new(1_920, &Tick::new(120), config);
 
         let expected = Output {
             config,
@@ -181,7 +180,7 @@ mod tests {
 
     #[test]
     fn it_updates_on_through_two_full_cycles_at_pwm_p50() {
-        let mut output = Output::new(1_920, Default::default());
+        let mut output = Output::new(1_920, &Tick::new(120), Default::default());
 
         assert_eq!(OFF, output.on);
 
@@ -215,7 +214,7 @@ mod tests {
 
     #[test]
     fn it_updates_edge_change_through_two_full_cycles_at_pwm_p50() {
-        let mut output = Output::new(1_920, Default::default());
+        let mut output = Output::new(1_920, &Tick::new(120), Default::default());
 
         assert_eq!(OFF, output.edge_change);
 
@@ -262,7 +261,7 @@ mod tests {
             rate,
             ..Default::default()
         };
-        let mut output = Output::new(1_920, config);
+        let mut output = Output::new(1_920, &Tick::new(120), config);
 
         assert_eq!(960, output.cycle_target);
         assert_eq!(480, output.off_target);
@@ -293,7 +292,7 @@ mod tests {
             rate,
             ..Default::default()
         };
-        let mut output = Output::new(1_920, config);
+        let mut output = Output::new(1_920, &Tick::new(120), config);
 
         assert_eq!(5_120, output.off_target);
         assert_eq!(10_240, output.cycle_target);
@@ -324,7 +323,7 @@ mod tests {
             prob,
             ..Default::default()
         };
-        let mut output = Output::new(1_920, config);
+        let mut output = Output::new(1_920, &Tick::new(120), config);
 
         assert_eq!(OFF, output.on);
 
@@ -348,7 +347,7 @@ mod tests {
             pwm,
             ..Default::default()
         };
-        let mut output = Output::new(1_920, config);
+        let mut output = Output::new(1_920, &Tick::new(120), config);
         output.tick(1);
     }
 
@@ -356,6 +355,7 @@ mod tests {
     fn it_updates_on_at_length_sixteen_at_density_four() {
         let mut euclid = Output::new(
             1_920,
+            &Tick::new(120),
             Config {
                 output_type: OutputType::Euclid,
                 ..Default::default()
@@ -418,6 +418,7 @@ mod tests {
     fn it_updates_edge_change_at_length_sixteen_at_density_four() {
         let mut euclid = Output::new(
             1_920,
+            &Tick::new(120),
             Config {
                 output_type: OutputType::Euclid,
                 ..Default::default()
