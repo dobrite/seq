@@ -1,3 +1,5 @@
+use core::cmp::min;
+
 use crate::{math, tick::Tick};
 
 const PEW_MODE_IN_MICRO_SECONDS: u64 = 10_000;
@@ -51,7 +53,7 @@ impl Pwm {
 
     pub fn off_target(&self, tick: &Tick, cycle_target: u32) -> u32 {
         match self {
-            Pwm::Pew => self.calculate_pew_mode_off_target(tick),
+            Pwm::Pew => self.calculate_pew_mode_off_target(tick, cycle_target),
             _ => {
                 let ratio: f32 = (*self).into();
                 (ratio * cycle_target as f32) as u32
@@ -59,8 +61,11 @@ impl Pwm {
         }
     }
 
-    fn calculate_pew_mode_off_target(&self, tick: &Tick) -> u32 {
-        math::ceil(PEW_MODE_IN_MICRO_SECONDS as f32 / tick.duration_micros as f32) as u32
+    fn calculate_pew_mode_off_target(&self, tick: &Tick, cycle_target: u32) -> u32 {
+        let pew_mode_off_target =
+            math::ceil(PEW_MODE_IN_MICRO_SECONDS as f32 / tick.duration_micros as f32) as u32;
+        let p10_off_target = Pwm::P10.off_target(tick, cycle_target);
+        min(pew_mode_off_target, p10_off_target)
     }
 }
 
@@ -113,6 +118,15 @@ mod tests {
     fn it_calcs_off_target_for_pew_mode_bpm_300() {
         let result = Pwm::Pew.off_target(&Tick::new(300), RESOLUTION);
         let expected = 97;
+
+        assert_eq!(expected, result);
+    }
+
+    #[test]
+    fn it_calcs_off_target_for_pew_mode_bpm_300_64_mult() {
+        let cycle_target_64_mult = RESOLUTION as f32 / 64_f32;
+        let result = Pwm::Pew.off_target(&Tick::new(300), cycle_target_64_mult as u32);
+        let expected = 3;
 
         assert_eq!(expected, result);
     }
