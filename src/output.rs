@@ -63,7 +63,10 @@ impl Output {
     }
 
     fn calc_off_target(&mut self, tick: &Tick) {
-        self.off_target = self.config.pwm.off_target(tick, self.cycle_target)
+        self.off_target = match self.config.output_type {
+            OutputType::Gate => self.config.pwm.off_target(tick, self.cycle_target),
+            OutputType::Euclid => Pwm::Pew.off_target(tick, self.cycle_target),
+        }
     }
 
     pub fn set_prob(&mut self, prob: Prob) {
@@ -126,10 +129,7 @@ impl Output {
 
     #[inline(always)]
     fn is_cycle_finished(&self, count: u32) -> bool {
-        match self.config.output_type {
-            OutputType::Gate => count % self.off_target == 0,
-            OutputType::Euclid => true,
-        }
+        count % self.cycle_target % self.off_target == 0
     }
 }
 
@@ -430,29 +430,31 @@ mod tests {
         euclid.tick(0);
         assert_eq!(ON, euclid.edge_change);
         euclid.tick(1);
+        assert_eq!(OFF, euclid.edge_change);
+        euclid.tick(39);
         assert_eq!(ON, euclid.edge_change);
-        euclid.tick(2);
+        euclid.tick(40);
         assert_eq!(OFF, euclid.edge_change);
 
         euclid.tick(1_919);
         assert_eq!(OFF, euclid.edge_change);
         euclid.tick(1_920);
         assert_eq!(OFF, euclid.edge_change);
-        euclid.tick(1_921);
+        euclid.tick(1_959);
         assert_eq!(OFF, euclid.edge_change);
 
         euclid.tick(3_839);
         assert_eq!(OFF, euclid.edge_change);
         euclid.tick(3_840);
         assert_eq!(OFF, euclid.edge_change);
-        euclid.tick(3_841);
+        euclid.tick(3_879);
         assert_eq!(OFF, euclid.edge_change);
 
         euclid.tick(5_759);
         assert_eq!(OFF, euclid.edge_change);
         euclid.tick(5_760);
         assert_eq!(OFF, euclid.edge_change);
-        euclid.tick(5_761);
+        euclid.tick(5_799);
         assert_eq!(OFF, euclid.edge_change);
 
         euclid.tick(7_679);
@@ -460,6 +462,10 @@ mod tests {
         euclid.tick(7_680);
         assert_eq!(ON, euclid.edge_change);
         euclid.tick(7_681);
+        assert_eq!(OFF, euclid.edge_change);
+        euclid.tick(7_719);
         assert_eq!(ON, euclid.edge_change);
+        euclid.tick(7_720);
+        assert_eq!(OFF, euclid.edge_change);
     }
 }
