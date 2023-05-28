@@ -94,6 +94,11 @@ impl Output {
         euclid(self.config.density, self.config.length, &mut self.sequence);
     }
 
+    pub fn set_output_type(&mut self, tick: &Tick, output_type: OutputType) {
+        self.config.output_type = output_type;
+        self.calc_targets(tick);
+    }
+
     pub fn tick(&mut self, count: u32) {
         let initial_on = self.on;
 

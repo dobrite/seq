@@ -82,6 +82,10 @@ impl Seq {
         self.outputs[index].set_density(density);
     }
 
+    pub fn set_output_type(&mut self, index: usize, output_type: OutputType) {
+        self.outputs[index].set_output_type(&self.tick, output_type);
+    }
+
     fn state(&self) -> &OutputStates {
         &self.output_states
     }
