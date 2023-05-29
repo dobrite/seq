@@ -17,7 +17,6 @@ pub struct Output {
     cycle_target: u32,
     off_target: u32,
     resolution: u32,
-    sequence: Vec<bool, 16>,
 }
 
 impl Default for Output {
@@ -36,7 +35,6 @@ impl Output {
             cycle_target: 0,
             off_target: 0,
             resolution,
-            sequence,
         };
 
         output.set_output_type(tick, output.config.output_type);
@@ -76,13 +74,21 @@ impl Output {
 
     pub fn set_length(&mut self, length: Length) {
         self.config.length = length;
-        self.sequence.resize_default(length.0 as usize).ok();
-        euclid(self.config.density, self.config.length, &mut self.sequence);
+        self.config.sequence.resize_default(length.0 as usize).ok();
+        euclid(
+            self.config.density,
+            self.config.length,
+            &mut self.config.sequence,
+        );
     }
 
     pub fn set_density(&mut self, density: Density) {
         self.config.density = density;
-        euclid(self.config.density, self.config.length, &mut self.sequence);
+        euclid(
+            self.config.density,
+            self.config.length,
+            &mut self.config.sequence,
+        );
     }
 
     pub fn set_output_type(&mut self, tick: &Tick, output_type: OutputType) {
@@ -96,7 +102,7 @@ impl Output {
             OutputType::Euclid => Prob::P100,
         };
         self.set_prob(prob);
-        euclid(density, self.config.length, &mut self.sequence);
+        euclid(density, self.config.length, &mut self.config.sequence);
         self.calc_targets(tick);
     }
 
@@ -127,7 +133,7 @@ impl Output {
 
     #[inline(always)]
     fn is_on(&self, state: &mut OutputState) -> bool {
-        state.rng.rand_bool(self.config.prob) && self.sequence[state.index as usize]
+        state.rng.rand_bool(self.config.prob) && self.config.sequence[state.index as usize]
     }
 
     #[inline(always)]
@@ -151,17 +157,18 @@ mod tests {
         let length = Length(16);
         let density = Density(16);
         let output_type = OutputType::Gate;
-        let config = Config {
+        let mut sequence: Vec<bool, 16> = Vec::new();
+        sequence.resize_default(16).ok();
+        let mut config = Config {
             density,
             length,
             output_type,
             prob,
             pwm,
             rate,
+            sequence,
         };
-        let mut sequence: Vec<bool, 16> = Vec::new();
-        sequence.resize_default(16).ok();
-        euclid(config.density, config.length, &mut sequence);
+        euclid(config.density, config.length, &mut config.sequence);
 
         let output = Output::new(1_920, &Tick::new(120), config.clone());
 
@@ -170,7 +177,6 @@ mod tests {
             cycle_target: 1_920,
             off_target: 960,
             resolution: 1_920,
-            sequence,
         };
 
         assert_eq!(expected, output);
