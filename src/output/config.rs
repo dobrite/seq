@@ -1,6 +1,6 @@
 use super::{Density, Length, OutputType, Prob, Pwm, Rate};
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Config {
     pub density: Density,
     pub length: Length,

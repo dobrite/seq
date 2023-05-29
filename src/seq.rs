@@ -28,7 +28,7 @@ impl Seq {
         output_states.resize_default(configs.len()).ok();
         let outputs = configs
             .iter()
-            .map(|config| Output::new(resolution, &tick, *config))
+            .map(|config| Output::new(resolution, &tick, config.clone()))
             .collect();
 
         Self {

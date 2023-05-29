@@ -39,7 +39,7 @@ impl Output {
             sequence,
         };
 
-        output.set_output_type(tick, config.output_type);
+        output.set_output_type(tick, output.config.output_type);
 
         output
     }
@@ -163,7 +163,7 @@ mod tests {
         sequence.resize_default(16).ok();
         euclid(config.density, config.length, &mut sequence);
 
-        let output = Output::new(1_920, &Tick::new(120), config);
+        let output = Output::new(1_920, &Tick::new(120), config.clone());
 
         let expected = Output {
             config,
