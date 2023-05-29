@@ -16,12 +16,7 @@ pub struct Output {
     config: Config,
     cycle_target: u32,
     off_target: u32,
-    pub(crate) on: bool,
-    pub(crate) edge_change: bool,
-    pub(crate) index: u32,
-    pub(crate) index_change: bool,
     resolution: u32,
-    rng: Rng,
     sequence: Vec<bool, 16>,
 }
 
@@ -40,12 +35,7 @@ impl Output {
             config,
             cycle_target: 0,
             off_target: 0,
-            on: false,
-            edge_change: false,
-            index: 0,
-            index_change: false,
             resolution,
-            rng: Rng::new(),
             sequence,
         };
 
@@ -110,24 +100,19 @@ impl Output {
         self.calc_targets(tick);
     }
 
-    pub fn tick(&mut self, count: u32) {
-        let initial_on = self.on;
-        let initial_index = self.index;
+    pub fn tick(&mut self, count: u32, state: &mut OutputState) {
+        let initial_on = state.on;
+        let initial_index = state.index;
 
         if self.is_cycle_starting(count) {
-            self.index = self.calc_index(count);
-            self.on = self.is_on();
+            state.index = self.calc_index(count);
+            state.on = self.is_on(state);
         } else if self.is_cycle_finished(count) {
-            self.on = false;
+            state.on = false;
         }
 
-        self.edge_change = initial_on != self.on;
-        self.index_change = initial_index != self.index;
-    }
-
-    pub fn state(&self, state: &mut OutputState) {
-        state.edge_change = self.edge_change;
-        state.on = self.on;
+        state.edge_change = initial_on != state.on;
+        state.index_change = initial_index != state.index;
     }
 
     #[inline(always)]
@@ -141,8 +126,8 @@ impl Output {
     }
 
     #[inline(always)]
-    fn is_on(&mut self) -> bool {
-        self.rng.rand_bool(self.config.prob) && self.sequence[self.index as usize]
+    fn is_on(&self, state: &mut OutputState) -> bool {
+        state.rng.rand_bool(self.config.prob) && self.sequence[state.index as usize]
     }
 
     #[inline(always)]
@@ -184,12 +169,7 @@ mod tests {
             config,
             cycle_target: 1_920,
             off_target: 960,
-            on: false,
-            edge_change: false,
-            index: 0,
-            index_change: false,
             resolution: 1_920,
-            rng: Rng::new(),
             sequence,
         };
 
@@ -198,402 +178,422 @@ mod tests {
 
     #[test]
     fn it_updates_on_through_two_full_cycles_at_pwm_p50() {
-        let mut output = Output::new(1_920, &Tick::new(120), Default::default());
+        let mut state: OutputState = Default::default();
+        let tick = Tick::new(120);
+        let mut output = Output::new(1_920, &tick, Default::default());
 
-        assert_eq!(OFF, output.on);
+        assert_eq!(OFF, state.on);
 
-        output.tick(0);
-        assert_eq!(ON, output.on);
+        output.tick(0, &mut state);
+        assert_eq!(ON, state.on);
 
-        output.tick(480);
-        assert_eq!(ON, output.on);
+        output.tick(480, &mut state);
+        assert_eq!(ON, state.on);
 
-        output.tick(960);
-        assert_eq!(OFF, output.on);
+        output.tick(960, &mut state);
+        assert_eq!(OFF, state.on);
 
-        output.tick(1_440);
-        assert_eq!(OFF, output.on);
+        output.tick(1_440, &mut state);
+        assert_eq!(OFF, state.on);
 
-        output.tick(1_920);
-        assert_eq!(ON, output.on);
+        output.tick(1_920, &mut state);
+        assert_eq!(ON, state.on);
 
-        output.tick(2_400);
-        assert_eq!(ON, output.on);
+        output.tick(2_400, &mut state);
+        assert_eq!(ON, state.on);
 
-        output.tick(2_880);
-        assert_eq!(OFF, output.on);
+        output.tick(2_880, &mut state);
+        assert_eq!(OFF, state.on);
 
-        output.tick(3_360);
-        assert_eq!(OFF, output.on);
+        output.tick(3_360, &mut state);
+        assert_eq!(OFF, state.on);
 
-        output.tick(3_840);
-        assert_eq!(ON, output.on);
+        output.tick(3_840, &mut state);
+        assert_eq!(ON, state.on);
     }
 
     #[test]
     fn it_updates_edge_change_through_two_full_cycles_at_pwm_p50() {
-        let mut output = Output::new(1_920, &Tick::new(120), Default::default());
+        let mut state: OutputState = Default::default();
+        let tick = Tick::new(120);
+        let mut output = Output::new(1_920, &tick, Default::default());
 
-        assert_eq!(OFF, output.edge_change);
+        assert_eq!(OFF, state.edge_change);
 
-        output.tick(0);
-        assert_eq!(ON, output.edge_change);
-        output.tick(1);
-        assert_eq!(OFF, output.edge_change);
-        output.tick(2);
-        assert_eq!(OFF, output.edge_change);
+        output.tick(0, &mut state);
+        assert_eq!(ON, state.edge_change);
+        output.tick(1, &mut state);
+        assert_eq!(OFF, state.edge_change);
+        output.tick(2, &mut state);
+        assert_eq!(OFF, state.edge_change);
 
-        output.tick(959);
-        assert_eq!(OFF, output.edge_change);
-        output.tick(960);
-        assert_eq!(ON, output.edge_change);
-        output.tick(961);
-        assert_eq!(OFF, output.edge_change);
+        output.tick(959, &mut state);
+        assert_eq!(OFF, state.edge_change);
+        output.tick(960, &mut state);
+        assert_eq!(ON, state.edge_change);
+        output.tick(961, &mut state);
+        assert_eq!(OFF, state.edge_change);
 
-        output.tick(1_919);
-        assert_eq!(OFF, output.edge_change);
-        output.tick(1_920);
-        assert_eq!(ON, output.edge_change);
-        output.tick(1_921);
-        assert_eq!(OFF, output.edge_change);
+        output.tick(1_919, &mut state);
+        assert_eq!(OFF, state.edge_change);
+        output.tick(1_920, &mut state);
+        assert_eq!(ON, state.edge_change);
+        output.tick(1_921, &mut state);
+        assert_eq!(OFF, state.edge_change);
 
-        output.tick(2_879);
-        assert_eq!(OFF, output.edge_change);
-        output.tick(2_880);
-        assert_eq!(ON, output.edge_change);
-        output.tick(2_881);
-        assert_eq!(OFF, output.edge_change);
+        output.tick(2_879, &mut state);
+        assert_eq!(OFF, state.edge_change);
+        output.tick(2_880, &mut state);
+        assert_eq!(ON, state.edge_change);
+        output.tick(2_881, &mut state);
+        assert_eq!(OFF, state.edge_change);
 
-        output.tick(3_839);
-        assert_eq!(OFF, output.edge_change);
-        output.tick(3_840);
-        assert_eq!(ON, output.edge_change);
-        output.tick(3_841);
-        assert_eq!(OFF, output.edge_change);
+        output.tick(3_839, &mut state);
+        assert_eq!(OFF, state.edge_change);
+        output.tick(3_840, &mut state);
+        assert_eq!(ON, state.edge_change);
+        output.tick(3_841, &mut state);
+        assert_eq!(OFF, state.edge_change);
     }
 
     #[test]
     fn it_ticks_at_mult_two_point_zero_times_the_rate() {
+        let mut state: OutputState = Default::default();
+        let tick = Tick::new(120);
         let rate = Rate::Mult(2, Frac::Zero);
         let config = Config {
             rate,
             ..Default::default()
         };
-        let mut output = Output::new(1_920, &Tick::new(120), config);
+        let mut output = Output::new(1_920, &tick, config);
 
         assert_eq!(960, output.cycle_target);
         assert_eq!(480, output.off_target);
         assert_eq!(rate, output.config.rate);
 
-        assert_eq!(OFF, output.on);
+        assert_eq!(OFF, state.on);
 
-        output.tick(0);
-        assert_eq!(ON, output.on);
+        output.tick(0, &mut state);
+        assert_eq!(ON, state.on);
 
-        output.tick(480);
-        assert_eq!(OFF, output.on);
+        output.tick(480, &mut state);
+        assert_eq!(OFF, state.on);
 
-        output.tick(960);
-        assert_eq!(ON, output.on);
+        output.tick(960, &mut state);
+        assert_eq!(ON, state.on);
 
-        output.tick(1_440);
-        assert_eq!(OFF, output.on);
+        output.tick(1_440, &mut state);
+        assert_eq!(OFF, state.on);
 
-        output.tick(1_920);
-        assert_eq!(ON, output.on);
+        output.tick(1_920, &mut state);
+        assert_eq!(ON, state.on);
     }
 
     #[test]
     fn it_ticks_at_div_five_point_one_third_the_rate() {
+        let mut state: OutputState = Default::default();
+        let tick = Tick::new(120);
         let rate = Rate::Div(5, Frac::OneThird);
         let config = Config {
             rate,
             ..Default::default()
         };
-        let mut output = Output::new(1_920, &Tick::new(120), config);
+        let mut output = Output::new(1_920, &tick, config);
 
         assert_eq!(5_120, output.off_target);
         assert_eq!(10_240, output.cycle_target);
         assert_eq!(rate, output.config.rate);
 
-        assert_eq!(OFF, output.on);
+        assert_eq!(OFF, state.on);
 
-        output.tick(0);
-        assert_eq!(ON, output.on);
+        output.tick(0, &mut state);
+        assert_eq!(ON, state.on);
 
-        output.tick(5_119);
-        assert_eq!(ON, output.on);
+        output.tick(5_119, &mut state);
+        assert_eq!(ON, state.on);
 
-        output.tick(5_120);
-        assert_eq!(OFF, output.on);
+        output.tick(5_120, &mut state);
+        assert_eq!(OFF, state.on);
 
-        output.tick(10_239);
-        assert_eq!(OFF, output.on);
+        output.tick(10_239, &mut state);
+        assert_eq!(OFF, state.on);
 
-        output.tick(10_240);
-        assert_eq!(ON, output.on);
+        output.tick(10_240, &mut state);
+        assert_eq!(ON, state.on);
     }
 
     #[test]
     fn it_skips_cycles_based_on_prob() {
+        let mut state: OutputState = Default::default();
+        let tick = Tick::new(120);
         let prob = Prob::P10;
         let config = Config {
             prob,
             ..Default::default()
         };
-        let mut output = Output::new(1_920, &Tick::new(120), config);
+        let mut output = Output::new(1_920, &tick, config);
 
-        assert_eq!(OFF, output.on);
+        assert_eq!(OFF, state.on);
 
-        output.tick(1_920);
-        assert_eq!(OFF, output.on);
+        output.tick(1_920, &mut state);
+        assert_eq!(OFF, state.on);
 
-        output.tick(3_840);
-        assert_eq!(OFF, output.on);
+        output.tick(3_840, &mut state);
+        assert_eq!(OFF, state.on);
 
-        output.tick(5_760);
-        assert_eq!(OFF, output.on);
+        output.tick(5_760, &mut state);
+        assert_eq!(OFF, state.on);
 
-        output.tick(7_680);
-        assert_eq!(OFF, output.on);
+        output.tick(7_680, &mut state);
+        assert_eq!(OFF, state.on);
     }
 
     #[test]
     fn it_works_with_pwm_pew() {
+        let mut state: OutputState = Default::default();
+        let tick = Tick::new(120);
         let pwm = Pwm::Pew;
         let config = Config {
             pwm,
             ..Default::default()
         };
-        let mut output = Output::new(1_920, &Tick::new(120), config);
-        output.tick(1);
+        let mut output = Output::new(1_920, &tick, config);
+        output.tick(1, &mut state);
     }
 
     #[test]
     fn it_updates_on_at_length_sixteen_at_density_four() {
+        let mut state: OutputState = Default::default();
+        let tick = Tick::new(120);
         let mut output = Output::new(
             1_920,
-            &Tick::new(120),
+            &tick,
             Config {
                 output_type: OutputType::Euclid,
                 ..Default::default()
             },
         );
 
-        output.tick(0);
-        assert_eq!(ON, output.on);
+        output.tick(0, &mut state);
+        assert_eq!(ON, state.on);
 
-        output.tick(1_920);
-        assert_eq!(OFF, output.on);
+        output.tick(1_920, &mut state);
+        assert_eq!(OFF, state.on);
 
-        output.tick(1_920 * 2);
-        assert_eq!(OFF, output.on);
+        output.tick(1_920 * 2, &mut state);
+        assert_eq!(OFF, state.on);
 
-        output.tick(1_920 * 3);
-        assert_eq!(OFF, output.on);
+        output.tick(1_920 * 3, &mut state);
+        assert_eq!(OFF, state.on);
 
-        output.tick(1_920 * 4);
-        assert_eq!(ON, output.on);
+        output.tick(1_920 * 4, &mut state);
+        assert_eq!(ON, state.on);
 
-        output.tick(1_920 * 5);
-        assert_eq!(OFF, output.on);
+        output.tick(1_920 * 5, &mut state);
+        assert_eq!(OFF, state.on);
 
-        output.tick(1_920 * 6);
-        assert_eq!(OFF, output.on);
+        output.tick(1_920 * 6, &mut state);
+        assert_eq!(OFF, state.on);
 
-        output.tick(1_920 * 7);
-        assert_eq!(OFF, output.on);
+        output.tick(1_920 * 7, &mut state);
+        assert_eq!(OFF, state.on);
 
-        output.tick(1_920 * 8);
-        assert_eq!(ON, output.on);
+        output.tick(1_920 * 8, &mut state);
+        assert_eq!(ON, state.on);
 
-        output.tick(1_920 * 9);
-        assert_eq!(OFF, output.on);
+        output.tick(1_920 * 9, &mut state);
+        assert_eq!(OFF, state.on);
 
-        output.tick(1_920 * 10);
-        assert_eq!(OFF, output.on);
+        output.tick(1_920 * 10, &mut state);
+        assert_eq!(OFF, state.on);
 
-        output.tick(1_920 * 11);
-        assert_eq!(OFF, output.on);
+        output.tick(1_920 * 11, &mut state);
+        assert_eq!(OFF, state.on);
 
-        output.tick(1_920 * 12);
-        assert_eq!(ON, output.on);
+        output.tick(1_920 * 12, &mut state);
+        assert_eq!(ON, state.on);
 
-        output.tick(1_920 * 13);
-        assert_eq!(OFF, output.on);
+        output.tick(1_920 * 13, &mut state);
+        assert_eq!(OFF, state.on);
 
-        output.tick(1_920 * 14);
-        assert_eq!(OFF, output.on);
+        output.tick(1_920 * 14, &mut state);
+        assert_eq!(OFF, state.on);
 
-        output.tick(1_920 * 15);
-        assert_eq!(OFF, output.on);
+        output.tick(1_920 * 15, &mut state);
+        assert_eq!(OFF, state.on);
 
-        output.tick(1_920 * 16);
-        assert_eq!(ON, output.on);
+        output.tick(1_920 * 16, &mut state);
+        assert_eq!(ON, state.on);
     }
 
     #[test]
     fn it_updates_edge_change_at_length_sixteen_at_density_four() {
+        let mut state: OutputState = Default::default();
+        let tick = Tick::new(120);
         let mut output = Output::new(
             1_920,
-            &Tick::new(120),
+            &tick,
             Config {
                 output_type: OutputType::Euclid,
                 ..Default::default()
             },
         );
 
-        assert_eq!(OFF, output.edge_change);
+        assert_eq!(OFF, state.edge_change);
 
-        output.tick(0);
-        assert_eq!(ON, output.edge_change);
-        output.tick(1);
-        assert_eq!(OFF, output.edge_change);
-        output.tick(39);
-        assert_eq!(ON, output.edge_change);
-        output.tick(40);
-        assert_eq!(OFF, output.edge_change);
+        output.tick(0, &mut state);
+        assert_eq!(ON, state.edge_change);
+        output.tick(1, &mut state);
+        assert_eq!(OFF, state.edge_change);
+        output.tick(39, &mut state);
+        assert_eq!(ON, state.edge_change);
+        output.tick(40, &mut state);
+        assert_eq!(OFF, state.edge_change);
 
-        output.tick(1_919);
-        assert_eq!(OFF, output.edge_change);
-        output.tick(1_920);
-        assert_eq!(OFF, output.edge_change);
-        output.tick(1_959);
-        assert_eq!(OFF, output.edge_change);
+        output.tick(1_919, &mut state);
+        assert_eq!(OFF, state.edge_change);
+        output.tick(1_920, &mut state);
+        assert_eq!(OFF, state.edge_change);
+        output.tick(1_959, &mut state);
+        assert_eq!(OFF, state.edge_change);
 
-        output.tick(3_839);
-        assert_eq!(OFF, output.edge_change);
-        output.tick(3_840);
-        assert_eq!(OFF, output.edge_change);
-        output.tick(3_879);
-        assert_eq!(OFF, output.edge_change);
+        output.tick(3_839, &mut state);
+        assert_eq!(OFF, state.edge_change);
+        output.tick(3_840, &mut state);
+        assert_eq!(OFF, state.edge_change);
+        output.tick(3_879, &mut state);
+        assert_eq!(OFF, state.edge_change);
 
-        output.tick(5_759);
-        assert_eq!(OFF, output.edge_change);
-        output.tick(5_760);
-        assert_eq!(OFF, output.edge_change);
-        output.tick(5_799);
-        assert_eq!(OFF, output.edge_change);
+        output.tick(5_759, &mut state);
+        assert_eq!(OFF, state.edge_change);
+        output.tick(5_760, &mut state);
+        assert_eq!(OFF, state.edge_change);
+        output.tick(5_799, &mut state);
+        assert_eq!(OFF, state.edge_change);
 
-        output.tick(7_679);
-        assert_eq!(OFF, output.edge_change);
-        output.tick(7_680);
-        assert_eq!(ON, output.edge_change);
-        output.tick(7_681);
-        assert_eq!(OFF, output.edge_change);
-        output.tick(7_719);
-        assert_eq!(ON, output.edge_change);
-        output.tick(7_720);
-        assert_eq!(OFF, output.edge_change);
+        output.tick(7_679, &mut state);
+        assert_eq!(OFF, state.edge_change);
+        output.tick(7_680, &mut state);
+        assert_eq!(ON, state.edge_change);
+        output.tick(7_681, &mut state);
+        assert_eq!(OFF, state.edge_change);
+        output.tick(7_719, &mut state);
+        assert_eq!(ON, state.edge_change);
+        output.tick(7_720, &mut state);
+        assert_eq!(OFF, state.edge_change);
     }
 
     #[test]
     fn it_updates_index_at_length_sixteen_at_density_four() {
+        let mut state: OutputState = Default::default();
+        let tick = Tick::new(120);
         let mut output = Output::new(
             1_920,
-            &Tick::new(120),
+            &tick,
             Config {
                 output_type: OutputType::Euclid,
                 ..Default::default()
             },
         );
 
-        assert_eq!(0, output.index);
+        assert_eq!(0, state.index);
 
-        output.tick(0);
-        assert_eq!(0, output.index);
-        output.tick(1);
-        assert_eq!(0, output.index);
-        output.tick(39);
-        assert_eq!(0, output.index);
-        output.tick(40);
-        assert_eq!(0, output.index);
+        output.tick(0, &mut state);
+        assert_eq!(0, state.index);
+        output.tick(1, &mut state);
+        assert_eq!(0, state.index);
+        output.tick(39, &mut state);
+        assert_eq!(0, state.index);
+        output.tick(40, &mut state);
+        assert_eq!(0, state.index);
 
-        output.tick(1_919);
-        assert_eq!(0, output.index);
-        output.tick(1_920);
-        assert_eq!(1, output.index);
-        output.tick(1_959);
-        assert_eq!(1, output.index);
+        output.tick(1_919, &mut state);
+        assert_eq!(0, state.index);
+        output.tick(1_920, &mut state);
+        assert_eq!(1, state.index);
+        output.tick(1_959, &mut state);
+        assert_eq!(1, state.index);
 
-        output.tick(3_839);
-        assert_eq!(1, output.index);
-        output.tick(3_840);
-        assert_eq!(2, output.index);
-        output.tick(3_879);
-        assert_eq!(2, output.index);
+        output.tick(3_839, &mut state);
+        assert_eq!(1, state.index);
+        output.tick(3_840, &mut state);
+        assert_eq!(2, state.index);
+        output.tick(3_879, &mut state);
+        assert_eq!(2, state.index);
 
-        output.tick(5_759);
-        assert_eq!(2, output.index);
-        output.tick(5_760);
-        assert_eq!(3, output.index);
-        output.tick(5_799);
-        assert_eq!(3, output.index);
+        output.tick(5_759, &mut state);
+        assert_eq!(2, state.index);
+        output.tick(5_760, &mut state);
+        assert_eq!(3, state.index);
+        output.tick(5_799, &mut state);
+        assert_eq!(3, state.index);
 
-        output.tick(7_679);
-        assert_eq!(3, output.index);
-        output.tick(7_680);
-        assert_eq!(4, output.index);
-        output.tick(7_681);
-        assert_eq!(4, output.index);
-        output.tick(7_719);
-        assert_eq!(4, output.index);
-        output.tick(7_720);
-        assert_eq!(4, output.index);
+        output.tick(7_679, &mut state);
+        assert_eq!(3, state.index);
+        output.tick(7_680, &mut state);
+        assert_eq!(4, state.index);
+        output.tick(7_681, &mut state);
+        assert_eq!(4, state.index);
+        output.tick(7_719, &mut state);
+        assert_eq!(4, state.index);
+        output.tick(7_720, &mut state);
+        assert_eq!(4, state.index);
     }
 
     #[test]
     fn it_updates_index_change_at_length_sixteen_at_density_four() {
+        let mut state: OutputState = Default::default();
+        let tick = Tick::new(120);
         let mut output = Output::new(
             1_920,
-            &Tick::new(120),
+            &tick,
             Config {
                 output_type: OutputType::Euclid,
                 ..Default::default()
             },
         );
 
-        assert_eq!(OFF, output.index_change);
+        assert_eq!(OFF, state.index_change);
 
-        output.tick(0);
-        assert_eq!(OFF, output.index_change);
-        output.tick(1);
-        assert_eq!(OFF, output.index_change);
-        output.tick(39);
-        assert_eq!(OFF, output.index_change);
-        output.tick(40);
-        assert_eq!(OFF, output.index_change);
+        output.tick(0, &mut state);
+        assert_eq!(OFF, state.index_change);
+        output.tick(1, &mut state);
+        assert_eq!(OFF, state.index_change);
+        output.tick(39, &mut state);
+        assert_eq!(OFF, state.index_change);
+        output.tick(40, &mut state);
+        assert_eq!(OFF, state.index_change);
 
-        output.tick(1_919);
-        assert_eq!(OFF, output.index_change);
-        output.tick(1_920);
-        assert_eq!(ON, output.index_change);
-        output.tick(1_959);
-        assert_eq!(OFF, output.index_change);
+        output.tick(1_919, &mut state);
+        assert_eq!(OFF, state.index_change);
+        output.tick(1_920, &mut state);
+        assert_eq!(ON, state.index_change);
+        output.tick(1_959, &mut state);
+        assert_eq!(OFF, state.index_change);
 
-        output.tick(3_839);
-        assert_eq!(OFF, output.index_change);
-        output.tick(3_840);
-        assert_eq!(ON, output.index_change);
-        output.tick(3_879);
-        assert_eq!(OFF, output.index_change);
+        output.tick(3_839, &mut state);
+        assert_eq!(OFF, state.index_change);
+        output.tick(3_840, &mut state);
+        assert_eq!(ON, state.index_change);
+        output.tick(3_879, &mut state);
+        assert_eq!(OFF, state.index_change);
 
-        output.tick(5_759);
-        assert_eq!(OFF, output.index_change);
-        output.tick(5_760);
-        assert_eq!(ON, output.index_change);
-        output.tick(5_799);
-        assert_eq!(OFF, output.index_change);
+        output.tick(5_759, &mut state);
+        assert_eq!(OFF, state.index_change);
+        output.tick(5_760, &mut state);
+        assert_eq!(ON, state.index_change);
+        output.tick(5_799, &mut state);
+        assert_eq!(OFF, state.index_change);
 
-        output.tick(7_679);
-        assert_eq!(OFF, output.index_change);
-        output.tick(7_680);
-        assert_eq!(ON, output.index_change);
-        output.tick(7_681);
-        assert_eq!(OFF, output.index_change);
-        output.tick(7_719);
-        assert_eq!(OFF, output.index_change);
-        output.tick(7_720);
-        assert_eq!(OFF, output.index_change);
+        output.tick(7_679, &mut state);
+        assert_eq!(OFF, state.index_change);
+        output.tick(7_680, &mut state);
+        assert_eq!(ON, state.index_change);
+        output.tick(7_681, &mut state);
+        assert_eq!(OFF, state.index_change);
+        output.tick(7_719, &mut state);
+        assert_eq!(OFF, state.index_change);
+        output.tick(7_720, &mut state);
+        assert_eq!(OFF, state.index_change);
     }
 }

@@ -43,12 +43,8 @@ impl Seq {
     }
 
     pub fn tick(&mut self) -> &OutputStates {
-        for output in self.outputs.iter_mut() {
-            output.tick(self.tick.count);
-        }
-
-        for (output, state) in self.outputs.iter().zip(self.output_states.iter_mut()) {
-            output.state(state);
+        for (output, state) in self.outputs.iter_mut().zip(self.output_states.iter_mut()) {
+            output.tick(self.tick.count, state);
         }
 
         self.tick.count += 1;
