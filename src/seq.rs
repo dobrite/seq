@@ -100,7 +100,7 @@ mod tests {
 
         let expected = OutputState {
             on: false,
-            edge_change: false,
+            on_change: false,
             index: 0,
             index_change: false,
             rng: Rng::new(),
@@ -125,7 +125,7 @@ mod tests {
 
         let expected = OutputState {
             on: true,
-            edge_change: true,
+            on_change: true,
             index: 0,
             index_change: false,
             rng: Rng::new(),
@@ -139,7 +139,7 @@ mod tests {
 
         let expected = OutputState {
             on: false,
-            edge_change: true,
+            on_change: true,
             index: 0,
             index_change: false,
             rng: Rng::new(),
