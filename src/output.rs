@@ -45,7 +45,7 @@ impl Output {
             index: 0,
             index_change: false,
             resolution,
-            rng: Rng::new(config.prob),
+            rng: Rng::new(),
             sequence,
         };
 
@@ -71,7 +71,7 @@ impl Output {
     }
 
     pub fn set_prob(&mut self, prob: Prob) {
-        self.rng = Rng::new(prob);
+        self.config.prob = prob;
     }
 
     pub fn set_pwm(&mut self, tick: &Tick, pwm: Pwm) {
@@ -142,7 +142,7 @@ impl Output {
 
     #[inline(always)]
     fn is_on(&mut self) -> bool {
-        self.rng.rand_bool() && self.sequence[self.index as usize]
+        self.rng.rand_bool(self.config.prob) && self.sequence[self.index as usize]
     }
 
     #[inline(always)]
@@ -189,7 +189,7 @@ mod tests {
             index: 0,
             index_change: false,
             resolution: 1_920,
-            rng: Rng::new(prob),
+            rng: Rng::new(),
             sequence,
         };
 
