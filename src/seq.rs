@@ -108,6 +108,8 @@ mod tests {
         let expected = OutputState {
             on: false,
             edge_change: false,
+            index: 0,
+            index_change: false,
         };
 
         assert_eq!(4, result.len());
@@ -132,6 +134,8 @@ mod tests {
         let expected = OutputState {
             on: true,
             edge_change: true,
+            index: 0,
+            index_change: false,
         };
 
         assert_eq!(1, result.len());
@@ -143,6 +147,8 @@ mod tests {
         let expected = OutputState {
             on: false,
             edge_change: true,
+            index: 0,
+            index_change: false,
         };
 
         assert_eq!(1, result.len());

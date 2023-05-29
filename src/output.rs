@@ -18,6 +18,8 @@ pub struct Output {
     off_target: u32,
     pub(crate) on: bool,
     pub(crate) edge_change: bool,
+    pub(crate) index: u32,
+    pub(crate) index_change: bool,
     resolution: u32,
     rng: Rng,
     sequence: Vec<bool, 16>,
@@ -35,7 +37,6 @@ impl Output {
         for _ in 0..config.length.0 {
             sequence.push(false).unwrap();
         }
-        euclid(config.density, config.length, &mut sequence);
 
         let mut output = Self {
             config,
@@ -43,12 +44,14 @@ impl Output {
             off_target: 0,
             on: false,
             edge_change: false,
+            index: 0,
+            index_change: false,
             resolution,
             rng: Rng::new(config.prob),
             sequence,
         };
 
-        output.calc_targets(tick);
+        output.set_output_type(tick, config.output_type);
 
         output
     }
@@ -96,19 +99,32 @@ impl Output {
 
     pub fn set_output_type(&mut self, tick: &Tick, output_type: OutputType) {
         self.config.output_type = output_type;
+        let density = match output_type {
+            OutputType::Gate => Density(self.config.length.0),
+            OutputType::Euclid => self.config.density,
+        };
+        let prob = match output_type {
+            OutputType::Gate => self.config.prob,
+            OutputType::Euclid => Prob::P100,
+        };
+        self.set_prob(prob);
+        euclid(density, self.config.length, &mut self.sequence);
         self.calc_targets(tick);
     }
 
     pub fn tick(&mut self, count: u32) {
         let initial_on = self.on;
+        let initial_index = self.index;
 
         if self.is_cycle_starting(count) {
-            self.on = self.is_on(count);
+            self.index = self.calc_index(count);
+            self.on = self.is_on();
         } else if self.is_cycle_finished(count) {
             self.on = false;
         }
 
         self.edge_change = initial_on != self.on;
+        self.index_change = initial_index != self.index;
     }
 
     pub fn state(&self, state: &mut OutputState) {
@@ -117,19 +133,18 @@ impl Output {
     }
 
     #[inline(always)]
+    fn calc_index(&self, count: u32) -> u32 {
+        count / self.cycle_target % self.config.length.0
+    }
+
+    #[inline(always)]
     fn is_cycle_starting(&self, count: u32) -> bool {
         count % self.cycle_target == 0
     }
 
     #[inline(always)]
-    fn is_on(&mut self, count: u32) -> bool {
-        match self.config.output_type {
-            OutputType::Gate => self.rng.rand_bool(),
-            OutputType::Euclid => {
-                let index = count / self.cycle_target % self.config.length.0;
-                self.sequence[index as usize]
-            }
-        }
+    fn is_on(&mut self) -> bool {
+        self.rng.rand_bool() && self.sequence[self.index as usize]
     }
 
     #[inline(always)]
@@ -151,7 +166,7 @@ mod tests {
         let pwm = Pwm::P50;
         let prob = Prob::P100;
         let length = Length(16);
-        let density = Density(4);
+        let density = Density(16);
         let output_type = OutputType::Gate;
         let config = Config {
             density,
@@ -175,6 +190,8 @@ mod tests {
             off_target: 960,
             on: false,
             edge_change: false,
+            index: 0,
+            index_change: false,
             resolution: 1_920,
             rng: Rng::new(prob),
             sequence,
@@ -472,5 +489,115 @@ mod tests {
         assert_eq!(ON, output.edge_change);
         output.tick(7_720);
         assert_eq!(OFF, output.edge_change);
+    }
+
+    #[test]
+    fn it_updates_index_at_length_sixteen_at_density_four() {
+        let mut output = Output::new(
+            1_920,
+            &Tick::new(120),
+            Config {
+                output_type: OutputType::Euclid,
+                ..Default::default()
+            },
+        );
+
+        assert_eq!(0, output.index);
+
+        output.tick(0);
+        assert_eq!(0, output.index);
+        output.tick(1);
+        assert_eq!(0, output.index);
+        output.tick(39);
+        assert_eq!(0, output.index);
+        output.tick(40);
+        assert_eq!(0, output.index);
+
+        output.tick(1_919);
+        assert_eq!(0, output.index);
+        output.tick(1_920);
+        assert_eq!(1, output.index);
+        output.tick(1_959);
+        assert_eq!(1, output.index);
+
+        output.tick(3_839);
+        assert_eq!(1, output.index);
+        output.tick(3_840);
+        assert_eq!(2, output.index);
+        output.tick(3_879);
+        assert_eq!(2, output.index);
+
+        output.tick(5_759);
+        assert_eq!(2, output.index);
+        output.tick(5_760);
+        assert_eq!(3, output.index);
+        output.tick(5_799);
+        assert_eq!(3, output.index);
+
+        output.tick(7_679);
+        assert_eq!(3, output.index);
+        output.tick(7_680);
+        assert_eq!(4, output.index);
+        output.tick(7_681);
+        assert_eq!(4, output.index);
+        output.tick(7_719);
+        assert_eq!(4, output.index);
+        output.tick(7_720);
+        assert_eq!(4, output.index);
+    }
+
+    #[test]
+    fn it_updates_index_change_at_length_sixteen_at_density_four() {
+        let mut output = Output::new(
+            1_920,
+            &Tick::new(120),
+            Config {
+                output_type: OutputType::Euclid,
+                ..Default::default()
+            },
+        );
+
+        assert_eq!(OFF, output.index_change);
+
+        output.tick(0);
+        assert_eq!(OFF, output.index_change);
+        output.tick(1);
+        assert_eq!(OFF, output.index_change);
+        output.tick(39);
+        assert_eq!(OFF, output.index_change);
+        output.tick(40);
+        assert_eq!(OFF, output.index_change);
+
+        output.tick(1_919);
+        assert_eq!(OFF, output.index_change);
+        output.tick(1_920);
+        assert_eq!(ON, output.index_change);
+        output.tick(1_959);
+        assert_eq!(OFF, output.index_change);
+
+        output.tick(3_839);
+        assert_eq!(OFF, output.index_change);
+        output.tick(3_840);
+        assert_eq!(ON, output.index_change);
+        output.tick(3_879);
+        assert_eq!(OFF, output.index_change);
+
+        output.tick(5_759);
+        assert_eq!(OFF, output.index_change);
+        output.tick(5_760);
+        assert_eq!(ON, output.index_change);
+        output.tick(5_799);
+        assert_eq!(OFF, output.index_change);
+
+        output.tick(7_679);
+        assert_eq!(OFF, output.index_change);
+        output.tick(7_680);
+        assert_eq!(ON, output.index_change);
+        output.tick(7_681);
+        assert_eq!(OFF, output.index_change);
+        output.tick(7_719);
+        assert_eq!(OFF, output.index_change);
+        output.tick(7_720);
+        assert_eq!(OFF, output.index_change);
     }
 }
