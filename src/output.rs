@@ -130,12 +130,12 @@ mod tests {
 
     #[test]
     fn it_new() {
-        let rate = Rate::Unity;
-        let pwm = Pwm::P50;
-        let prob = Prob::P100;
-        let length = Length(16);
         let density = Density(16);
+        let length = Length(16);
         let output_type = OutputType::Gate;
+        let prob = Prob::P100;
+        let pwm = Pwm::P50;
+        let rate = Rate::Unity;
         let mut sequence: Vec<bool, 16> = Vec::new();
         sequence.resize_default(16).ok();
         let mut config = Config {
