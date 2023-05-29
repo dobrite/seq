@@ -358,7 +358,7 @@ mod tests {
 
     #[test]
     fn it_updates_on_at_length_sixteen_at_density_four() {
-        let mut euclid = Output::new(
+        let mut output = Output::new(
             1_920,
             &Tick::new(120),
             Config {
@@ -367,61 +367,61 @@ mod tests {
             },
         );
 
-        euclid.tick(0);
-        assert_eq!(ON, euclid.on);
+        output.tick(0);
+        assert_eq!(ON, output.on);
 
-        euclid.tick(1_920);
-        assert_eq!(OFF, euclid.on);
+        output.tick(1_920);
+        assert_eq!(OFF, output.on);
 
-        euclid.tick(1_920 * 2);
-        assert_eq!(OFF, euclid.on);
+        output.tick(1_920 * 2);
+        assert_eq!(OFF, output.on);
 
-        euclid.tick(1_920 * 3);
-        assert_eq!(OFF, euclid.on);
+        output.tick(1_920 * 3);
+        assert_eq!(OFF, output.on);
 
-        euclid.tick(1_920 * 4);
-        assert_eq!(ON, euclid.on);
+        output.tick(1_920 * 4);
+        assert_eq!(ON, output.on);
 
-        euclid.tick(1_920 * 5);
-        assert_eq!(OFF, euclid.on);
+        output.tick(1_920 * 5);
+        assert_eq!(OFF, output.on);
 
-        euclid.tick(1_920 * 6);
-        assert_eq!(OFF, euclid.on);
+        output.tick(1_920 * 6);
+        assert_eq!(OFF, output.on);
 
-        euclid.tick(1_920 * 7);
-        assert_eq!(OFF, euclid.on);
+        output.tick(1_920 * 7);
+        assert_eq!(OFF, output.on);
 
-        euclid.tick(1_920 * 8);
-        assert_eq!(ON, euclid.on);
+        output.tick(1_920 * 8);
+        assert_eq!(ON, output.on);
 
-        euclid.tick(1_920 * 9);
-        assert_eq!(OFF, euclid.on);
+        output.tick(1_920 * 9);
+        assert_eq!(OFF, output.on);
 
-        euclid.tick(1_920 * 10);
-        assert_eq!(OFF, euclid.on);
+        output.tick(1_920 * 10);
+        assert_eq!(OFF, output.on);
 
-        euclid.tick(1_920 * 11);
-        assert_eq!(OFF, euclid.on);
+        output.tick(1_920 * 11);
+        assert_eq!(OFF, output.on);
 
-        euclid.tick(1_920 * 12);
-        assert_eq!(ON, euclid.on);
+        output.tick(1_920 * 12);
+        assert_eq!(ON, output.on);
 
-        euclid.tick(1_920 * 13);
-        assert_eq!(OFF, euclid.on);
+        output.tick(1_920 * 13);
+        assert_eq!(OFF, output.on);
 
-        euclid.tick(1_920 * 14);
-        assert_eq!(OFF, euclid.on);
+        output.tick(1_920 * 14);
+        assert_eq!(OFF, output.on);
 
-        euclid.tick(1_920 * 15);
-        assert_eq!(OFF, euclid.on);
+        output.tick(1_920 * 15);
+        assert_eq!(OFF, output.on);
 
-        euclid.tick(1_920 * 16);
-        assert_eq!(ON, euclid.on);
+        output.tick(1_920 * 16);
+        assert_eq!(ON, output.on);
     }
 
     #[test]
     fn it_updates_edge_change_at_length_sixteen_at_density_four() {
-        let mut euclid = Output::new(
+        let mut output = Output::new(
             1_920,
             &Tick::new(120),
             Config {
@@ -430,47 +430,47 @@ mod tests {
             },
         );
 
-        assert_eq!(OFF, euclid.edge_change);
+        assert_eq!(OFF, output.edge_change);
 
-        euclid.tick(0);
-        assert_eq!(ON, euclid.edge_change);
-        euclid.tick(1);
-        assert_eq!(OFF, euclid.edge_change);
-        euclid.tick(39);
-        assert_eq!(ON, euclid.edge_change);
-        euclid.tick(40);
-        assert_eq!(OFF, euclid.edge_change);
+        output.tick(0);
+        assert_eq!(ON, output.edge_change);
+        output.tick(1);
+        assert_eq!(OFF, output.edge_change);
+        output.tick(39);
+        assert_eq!(ON, output.edge_change);
+        output.tick(40);
+        assert_eq!(OFF, output.edge_change);
 
-        euclid.tick(1_919);
-        assert_eq!(OFF, euclid.edge_change);
-        euclid.tick(1_920);
-        assert_eq!(OFF, euclid.edge_change);
-        euclid.tick(1_959);
-        assert_eq!(OFF, euclid.edge_change);
+        output.tick(1_919);
+        assert_eq!(OFF, output.edge_change);
+        output.tick(1_920);
+        assert_eq!(OFF, output.edge_change);
+        output.tick(1_959);
+        assert_eq!(OFF, output.edge_change);
 
-        euclid.tick(3_839);
-        assert_eq!(OFF, euclid.edge_change);
-        euclid.tick(3_840);
-        assert_eq!(OFF, euclid.edge_change);
-        euclid.tick(3_879);
-        assert_eq!(OFF, euclid.edge_change);
+        output.tick(3_839);
+        assert_eq!(OFF, output.edge_change);
+        output.tick(3_840);
+        assert_eq!(OFF, output.edge_change);
+        output.tick(3_879);
+        assert_eq!(OFF, output.edge_change);
 
-        euclid.tick(5_759);
-        assert_eq!(OFF, euclid.edge_change);
-        euclid.tick(5_760);
-        assert_eq!(OFF, euclid.edge_change);
-        euclid.tick(5_799);
-        assert_eq!(OFF, euclid.edge_change);
+        output.tick(5_759);
+        assert_eq!(OFF, output.edge_change);
+        output.tick(5_760);
+        assert_eq!(OFF, output.edge_change);
+        output.tick(5_799);
+        assert_eq!(OFF, output.edge_change);
 
-        euclid.tick(7_679);
-        assert_eq!(OFF, euclid.edge_change);
-        euclid.tick(7_680);
-        assert_eq!(ON, euclid.edge_change);
-        euclid.tick(7_681);
-        assert_eq!(OFF, euclid.edge_change);
-        euclid.tick(7_719);
-        assert_eq!(ON, euclid.edge_change);
-        euclid.tick(7_720);
-        assert_eq!(OFF, euclid.edge_change);
+        output.tick(7_679);
+        assert_eq!(OFF, output.edge_change);
+        output.tick(7_680);
+        assert_eq!(ON, output.edge_change);
+        output.tick(7_681);
+        assert_eq!(OFF, output.edge_change);
+        output.tick(7_719);
+        assert_eq!(ON, output.edge_change);
+        output.tick(7_720);
+        assert_eq!(OFF, output.edge_change);
     }
 }
