@@ -84,6 +84,7 @@ impl Seq {
         self.outputs[index].set_output_type(&self.tick, output_type);
     }
 
+    #[inline(always)]
     fn state(&self) -> &OutputStates {
         &self.output_states
     }
