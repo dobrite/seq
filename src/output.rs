@@ -32,7 +32,7 @@ impl Default for Output {
 impl Output {
     pub fn new(resolution: u32, tick: &Tick, config: Config) -> Self {
         let mut sequence: Vec<bool, 16> = Vec::new();
-        for _ in 0..16 {
+        for _ in 0..config.length.0 {
             sequence.push(false).unwrap();
         }
         euclid(config.density, config.length, &mut sequence);
@@ -85,7 +85,7 @@ impl Output {
 
     pub fn set_length(&mut self, length: Length) {
         self.config.length = length;
-        self.sequence.truncate(length.0 as usize);
+        self.sequence.resize_default(length.0 as usize).ok();
         euclid(self.config.density, self.config.length, &mut self.sequence);
     }
 
