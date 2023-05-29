@@ -107,6 +107,7 @@ mod tests {
             edge_change: false,
             index: 0,
             index_change: false,
+            rng: Rng::new(),
         };
 
         assert_eq!(4, result.len());
@@ -131,6 +132,7 @@ mod tests {
             edge_change: true,
             index: 0,
             index_change: false,
+            rng: Rng::new(),
         };
 
         assert_eq!(1, result.len());
@@ -144,6 +146,7 @@ mod tests {
             edge_change: true,
             index: 0,
             index_change: false,
+            rng: Rng::new(),
         };
 
         assert_eq!(1, result.len());

@@ -1,6 +1,6 @@
 use heapless::Vec;
 
-use super::Output;
+use super::{Output, Rng};
 
 pub type OutputStates = Vec<OutputState, 4>;
 
@@ -10,6 +10,7 @@ pub struct OutputState {
     pub edge_change: bool,
     pub index: u32,
     pub index_change: bool,
+    pub rng: Rng,
 }
 
 impl From<&Output> for OutputState {
@@ -19,6 +20,7 @@ impl From<&Output> for OutputState {
             edge_change: val.edge_change,
             index: val.index,
             index_change: val.index_change,
+            rng: Rng::new(),
         }
     }
 }

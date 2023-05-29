@@ -4,9 +4,15 @@ use super::Prob;
 
 const RNG_SEED: u64 = 0;
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Rng {
     rng: Rand32,
+}
+
+impl Default for Rng {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Rng {
