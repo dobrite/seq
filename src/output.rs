@@ -34,9 +34,7 @@ impl Default for Output {
 impl Output {
     pub fn new(resolution: u32, tick: &Tick, config: Config) -> Self {
         let mut sequence: Vec<bool, 16> = Vec::new();
-        for _ in 0..config.length.0 {
-            sequence.push(false).unwrap();
-        }
+        sequence.resize_default(config.length.0 as usize).ok();
 
         let mut output = Self {
             config,
@@ -177,9 +175,7 @@ mod tests {
             rate,
         };
         let mut sequence: Vec<bool, 16> = Vec::new();
-        for _ in 0..16 {
-            sequence.push(false).unwrap();
-        }
+        sequence.resize_default(16).ok();
         euclid(config.density, config.length, &mut sequence);
 
         let output = Output::new(1_920, &Tick::new(120), config);

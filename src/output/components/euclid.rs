@@ -51,13 +51,8 @@ mod tests {
         let density = Density(4);
         let length = Length(16);
 
-        let mut result: heapless::Vec<bool, 16> = {
-            let mut v = Vec::new();
-            for _ in 0..16 {
-                v.push(false).unwrap();
-            }
-            v
-        };
+        let mut result = Vec::new();
+        result.resize_default(16).ok();
 
         let expected: heapless::Vec<bool, 16> = heapless::Vec::from_slice(&[
             ON, OFF, OFF, OFF, ON, OFF, OFF, OFF, ON, OFF, OFF, OFF, ON, OFF, OFF, OFF,
@@ -74,13 +69,8 @@ mod tests {
         let density = Density(9);
         let length = Length(16);
 
-        let mut result: heapless::Vec<bool, 16> = {
-            let mut v = Vec::new();
-            for _ in 0..16 {
-                v.push(false).unwrap();
-            }
-            v
-        };
+        let mut result = Vec::new();
+        result.resize_default(16).ok();
 
         let expected: heapless::Vec<bool, 16> = heapless::Vec::from_slice(&[
             ON, OFF, ON, OFF, ON, OFF, ON, OFF, ON, ON, OFF, ON, OFF, ON, OFF, ON,

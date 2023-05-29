@@ -25,9 +25,7 @@ impl Seq {
     fn new_with_resolution(resolution: u32, bpm: u32, configs: Vec<Config, 4>) -> Self {
         let tick = Tick::new(bpm);
         let mut output_states = Vec::new();
-        for _ in 0..configs.len() {
-            output_states.push(Default::default()).ok();
-        }
+        output_states.resize_default(configs.len()).ok();
         let outputs = configs
             .iter()
             .map(|config| Output::new(resolution, &tick, *config))
@@ -99,9 +97,7 @@ mod tests {
     fn it_new() {
         let resolution = 1_920;
         let mut configs: Vec<Config, 4> = Vec::new();
-        for _ in 0..4 {
-            configs.push(Default::default()).unwrap();
-        }
+        configs.resize_default(4).ok();
         let seq = Seq::new_with_resolution(resolution, 120, configs);
         let result = seq.state();
 
@@ -123,9 +119,7 @@ mod tests {
     fn it_updates() {
         let resolution = 2;
         let mut configs: Vec<Config, 4> = Vec::new();
-        for _ in 0..1 {
-            configs.push(Default::default()).unwrap();
-        }
+        configs.resize_default(1).ok();
         let mut seq = Seq::new_with_resolution(resolution, 120, configs);
 
         seq.tick();

@@ -4,7 +4,7 @@ use super::Output;
 
 pub type OutputStates = Vec<OutputState, 4>;
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct OutputState {
     pub on: bool,
     pub edge_change: bool,
