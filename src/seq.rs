@@ -99,10 +99,10 @@ mod tests {
         let result = seq.state();
 
         let expected = OutputState {
-            on: false,
-            on_change: false,
             index: 0,
             index_change: false,
+            on: false,
+            on_change: false,
             rng: Rng::new(),
         };
 
@@ -124,10 +124,10 @@ mod tests {
         let result = seq.state();
 
         let expected = OutputState {
-            on: true,
-            on_change: true,
             index: 0,
             index_change: false,
+            on: true,
+            on_change: true,
             rng: Rng::new(),
         };
 
@@ -138,10 +138,10 @@ mod tests {
         let result = seq.state();
 
         let expected = OutputState {
-            on: false,
-            on_change: true,
             index: 0,
             index_change: false,
+            on: false,
+            on_change: true,
             rng: Rng::new(),
         };
 
