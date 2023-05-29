@@ -58,51 +58,30 @@ impl Output {
         }
     }
 
+    pub fn set_density(&mut self, density: Density) {
+        self.config.set_density(density);
+    }
+
+    pub fn set_length(&mut self, length: Length) {
+        self.config.set_length(length);
+    }
+
+    pub fn set_output_type(&mut self, tick: &Tick, output_type: OutputType) {
+        self.config.set_output_type(output_type);
+        self.calc_targets(tick);
+    }
+
     pub fn set_prob(&mut self, prob: Prob) {
-        self.config.prob = prob;
+        self.config.set_prob(prob);
     }
 
     pub fn set_pwm(&mut self, tick: &Tick, pwm: Pwm) {
-        self.config.pwm = pwm;
+        self.config.set_pwm(pwm);
         self.calc_targets(tick);
     }
 
     pub fn set_rate(&mut self, tick: &Tick, rate: Rate) {
-        self.config.rate = rate;
-        self.calc_targets(tick);
-    }
-
-    pub fn set_length(&mut self, length: Length) {
-        self.config.length = length;
-        self.config.sequence.resize_default(length.0 as usize).ok();
-        euclid(
-            self.config.density,
-            self.config.length,
-            &mut self.config.sequence,
-        );
-    }
-
-    pub fn set_density(&mut self, density: Density) {
-        self.config.density = density;
-        euclid(
-            self.config.density,
-            self.config.length,
-            &mut self.config.sequence,
-        );
-    }
-
-    pub fn set_output_type(&mut self, tick: &Tick, output_type: OutputType) {
-        self.config.output_type = output_type;
-        let density = match output_type {
-            OutputType::Gate => Density(self.config.length.0),
-            OutputType::Euclid => self.config.density,
-        };
-        let prob = match output_type {
-            OutputType::Gate => self.config.prob,
-            OutputType::Euclid => Prob::P100,
-        };
-        self.set_prob(prob);
-        euclid(density, self.config.length, &mut self.config.sequence);
+        self.config.set_rate(rate);
         self.calc_targets(tick);
     }
 
