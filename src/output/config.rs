@@ -5,6 +5,7 @@ use super::*;
 #[derive(Clone, Debug, PartialEq)]
 pub struct Config {
     density: Density,
+    index: u32,
     length: Length,
     output_type: OutputType,
     prob: Prob,
@@ -26,6 +27,7 @@ impl Config {
 
         let mut config = Self {
             density: Density(4),
+            index: 0,
             length: Length(16),
             output_type: OutputType::Gate,
             prob: Prob::P100,
@@ -41,6 +43,10 @@ impl Config {
 
     pub fn density(&self) -> Density {
         self.density
+    }
+
+    pub fn index(&self) -> u32 {
+        self.index
     }
 
     pub fn length(&self) -> Length {
@@ -70,6 +76,10 @@ impl Config {
     pub fn set_density(&mut self, density: Density) {
         self.density = density;
         euclid(self.density, self.length, &mut self.sequence);
+    }
+
+    pub fn set_index(&mut self, index: u32) {
+        self.index = index;
     }
 
     pub fn set_length(&mut self, length: Length) {
