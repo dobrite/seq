@@ -28,7 +28,7 @@ impl Default for Output {
 impl Output {
     pub fn new(resolution: u32, tick: &Tick, config: Config) -> Self {
         let mut sequence: Vec<bool, 16> = Vec::new();
-        sequence.resize_default(config.length.0 as usize).ok();
+        sequence.resize_default(config.length().0 as usize).ok();
 
         let mut output = Self {
             config,
@@ -37,7 +37,7 @@ impl Output {
             resolution,
         };
 
-        output.set_output_type(tick, output.config.output_type);
+        output.set_output_type(tick, output.config.output_type());
 
         output
     }
@@ -48,12 +48,12 @@ impl Output {
     }
 
     fn calc_cycle_target(&mut self) {
-        self.cycle_target = (Into::<f32>::into(self.config.rate) * self.resolution as f32) as u32
+        self.cycle_target = (Into::<f32>::into(self.config.rate()) * self.resolution as f32) as u32
     }
 
     fn calc_off_target(&mut self, tick: &Tick) {
-        self.off_target = match self.config.output_type {
-            OutputType::Gate => self.config.pwm.off_target(tick, self.cycle_target),
+        self.off_target = match self.config.output_type() {
+            OutputType::Gate => self.config.pwm().off_target(tick, self.cycle_target),
             OutputType::Euclid => Pwm::Pew.off_target(tick, self.cycle_target),
         }
     }
@@ -102,7 +102,7 @@ impl Output {
 
     #[inline(always)]
     fn calc_index(&self, count: u32) -> u32 {
-        count / self.cycle_target % self.config.length.0
+        count / self.cycle_target % self.config.length().0
     }
 
     #[inline(always)]
@@ -112,7 +112,7 @@ impl Output {
 
     #[inline(always)]
     fn is_on(&self, state: &mut OutputState) -> bool {
-        state.rng.rand_bool(self.config.prob) && self.config.sequence[state.index as usize]
+        state.rng.rand_bool(self.config.prob()) && self.config.sequence()[state.index as usize]
     }
 
     #[inline(always)]
@@ -130,25 +130,7 @@ mod tests {
 
     #[test]
     fn it_new() {
-        let density = Density(16);
-        let length = Length(16);
-        let output_type = OutputType::Gate;
-        let prob = Prob::P100;
-        let pwm = Pwm::P50;
-        let rate = Rate::Unity;
-        let mut sequence: Vec<bool, 16> = Vec::new();
-        sequence.resize_default(16).ok();
-        let mut config = Config {
-            density,
-            length,
-            output_type,
-            prob,
-            pwm,
-            rate,
-            sequence,
-        };
-        euclid(config.density, config.length, &mut config.sequence);
-
+        let config = Config::new();
         let output = Output::new(1_920, &Tick::new(120), config.clone());
 
         let expected = Output {
@@ -246,15 +228,13 @@ mod tests {
         let mut state: OutputState = Default::default();
         let tick = Tick::new(120);
         let rate = Rate::Mult(2, Frac::Zero);
-        let config = Config {
-            rate,
-            ..Default::default()
-        };
+        let mut config = Config::new();
+        config.set_rate(rate);
         let mut output = Output::new(1_920, &tick, config);
 
         assert_eq!(960, output.cycle_target);
         assert_eq!(480, output.off_target);
-        assert_eq!(rate, output.config.rate);
+        assert_eq!(rate, output.config.rate());
 
         assert_eq!(OFF, state.on);
 
@@ -279,15 +259,13 @@ mod tests {
         let mut state: OutputState = Default::default();
         let tick = Tick::new(120);
         let rate = Rate::Div(5, Frac::OneThird);
-        let config = Config {
-            rate,
-            ..Default::default()
-        };
+        let mut config = Config::new();
+        config.set_rate(rate);
         let mut output = Output::new(1_920, &tick, config);
 
         assert_eq!(5_120, output.off_target);
         assert_eq!(10_240, output.cycle_target);
-        assert_eq!(rate, output.config.rate);
+        assert_eq!(rate, output.config.rate());
 
         assert_eq!(OFF, state.on);
 
@@ -312,10 +290,8 @@ mod tests {
         let mut state: OutputState = Default::default();
         let tick = Tick::new(120);
         let prob = Prob::P10;
-        let config = Config {
-            prob,
-            ..Default::default()
-        };
+        let mut config = Config::new();
+        config.set_prob(prob);
         let mut output = Output::new(1_920, &tick, config);
 
         assert_eq!(OFF, state.on);
@@ -338,10 +314,8 @@ mod tests {
         let mut state: OutputState = Default::default();
         let tick = Tick::new(120);
         let pwm = Pwm::Pew;
-        let config = Config {
-            pwm,
-            ..Default::default()
-        };
+        let mut config = Config::new();
+        config.set_pwm(pwm);
         let mut output = Output::new(1_920, &tick, config);
         output.tick(1, &mut state);
     }
@@ -350,14 +324,9 @@ mod tests {
     fn it_updates_on_at_length_sixteen_at_density_four() {
         let mut state: OutputState = Default::default();
         let tick = Tick::new(120);
-        let mut output = Output::new(
-            1_920,
-            &tick,
-            Config {
-                output_type: OutputType::Euclid,
-                ..Default::default()
-            },
-        );
+        let mut config = Config::new();
+        config.set_output_type(OutputType::Euclid);
+        let mut output = Output::new(1_920, &tick, config);
 
         output.tick(0, &mut state);
         assert_eq!(ON, state.on);
@@ -415,14 +384,9 @@ mod tests {
     fn it_updates_on_change_at_length_sixteen_at_density_four() {
         let mut state: OutputState = Default::default();
         let tick = Tick::new(120);
-        let mut output = Output::new(
-            1_920,
-            &tick,
-            Config {
-                output_type: OutputType::Euclid,
-                ..Default::default()
-            },
-        );
+        let mut config = Config::new();
+        config.set_output_type(OutputType::Euclid);
+        let mut output = Output::new(1_920, &tick, config);
 
         assert_eq!(OFF, state.on_change);
 
@@ -472,14 +436,9 @@ mod tests {
     fn it_updates_index_at_length_sixteen_at_density_four() {
         let mut state: OutputState = Default::default();
         let tick = Tick::new(120);
-        let mut output = Output::new(
-            1_920,
-            &tick,
-            Config {
-                output_type: OutputType::Euclid,
-                ..Default::default()
-            },
-        );
+        let mut config = Config::new();
+        config.set_output_type(OutputType::Euclid);
+        let mut output = Output::new(1_920, &tick, config);
 
         assert_eq!(0, state.index);
 
@@ -529,14 +488,9 @@ mod tests {
     fn it_updates_index_change_at_length_sixteen_at_density_four() {
         let mut state: OutputState = Default::default();
         let tick = Tick::new(120);
-        let mut output = Output::new(
-            1_920,
-            &tick,
-            Config {
-                output_type: OutputType::Euclid,
-                ..Default::default()
-            },
-        );
+        let mut config = Config::new();
+        config.set_output_type(OutputType::Euclid);
+        let mut output = Output::new(1_920, &tick, config);
 
         assert_eq!(OFF, state.index_change);
 

@@ -4,13 +4,13 @@ use super::*;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Config {
-    pub density: Density,
-    pub length: Length,
-    pub output_type: OutputType,
-    pub prob: Prob,
-    pub pwm: Pwm,
-    pub rate: Rate,
-    pub sequence: Vec<bool, 16>,
+    density: Density,
+    length: Length,
+    output_type: OutputType,
+    prob: Prob,
+    pwm: Pwm,
+    rate: Rate,
+    sequence: Vec<bool, 16>,
 }
 
 impl Default for Config {
@@ -24,7 +24,7 @@ impl Config {
         let mut sequence = Vec::new();
         sequence.resize_default(16).ok();
 
-        Self {
+        let mut config = Self {
             density: Density(4),
             length: Length(16),
             output_type: OutputType::Gate,
@@ -32,7 +32,39 @@ impl Config {
             pwm: Pwm::P50,
             rate: Rate::Unity,
             sequence,
-        }
+        };
+
+        config.set_output_type(config.output_type);
+
+        config
+    }
+
+    pub fn density(&self) -> Density {
+        self.density
+    }
+
+    pub fn length(&self) -> Length {
+        self.length
+    }
+
+    pub fn output_type(&self) -> OutputType {
+        self.output_type
+    }
+
+    pub fn prob(&self) -> Prob {
+        self.prob
+    }
+
+    pub fn pwm(&self) -> Pwm {
+        self.pwm
+    }
+
+    pub fn rate(&self) -> Rate {
+        self.rate
+    }
+
+    pub fn sequence(&self) -> &Vec<bool, 16> {
+        &self.sequence
     }
 
     pub fn set_density(&mut self, density: Density) {
