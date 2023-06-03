@@ -5,7 +5,7 @@ use super::*;
 #[derive(Clone, Debug, PartialEq)]
 pub struct Config {
     density: Density,
-    index: u32,
+    index: usize,
     length: Length,
     output_type: OutputType,
     prob: Prob,
@@ -45,7 +45,7 @@ impl Config {
         self.density
     }
 
-    pub fn index(&self) -> u32 {
+    pub fn index(&self) -> usize {
         self.index
     }
 
@@ -78,7 +78,7 @@ impl Config {
         euclid(self.density, self.length, &mut self.sequence);
     }
 
-    pub fn set_index(&mut self, index: u32) {
+    pub fn set_index(&mut self, index: usize) {
         self.index = index;
     }
 

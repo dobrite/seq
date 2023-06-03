@@ -101,8 +101,8 @@ impl Output {
     }
 
     #[inline(always)]
-    fn calc_index(&self, count: u32) -> u32 {
-        count / self.cycle_target % self.config.length().0
+    fn calc_index(&self, count: u32) -> usize {
+        (count / self.cycle_target % self.config.length().0) as usize
     }
 
     #[inline(always)]
@@ -112,7 +112,7 @@ impl Output {
 
     #[inline(always)]
     fn is_on(&self, state: &mut OutputState) -> bool {
-        state.rng.rand_bool(self.config.prob()) && self.config.sequence()[state.index as usize]
+        state.rng.rand_bool(self.config.prob()) && self.config.sequence()[state.index]
     }
 
     #[inline(always)]
