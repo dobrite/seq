@@ -2,10 +2,14 @@ use heapless::Vec;
 
 use super::{Density, Length};
 
+pub const MAX_STEPS: usize = 16;
+
+pub type Sequence = Vec<bool, MAX_STEPS>;
+
 // This generates incorrect sequences compared to
 // PAMs and Euclidean Circles V2
 #[allow(dead_code)]
-fn euclid_wrong(d: Density, l: Length, sequence: &mut Vec<bool, 16>) {
+fn euclid_wrong(d: Density, l: Length, sequence: &mut Sequence) {
     let density = d.0 as i32;
     let length = l.0 as i32;
 
@@ -32,16 +36,16 @@ fn euclid_wrong(d: Density, l: Length, sequence: &mut Vec<bool, 16>) {
 }
 
 // https://github.com/brianhouse/bjorklund (MIT)
-pub fn euclid(d: Density, l: Length, sequence: &mut Vec<bool, 16>) {
+pub fn euclid(d: Density, l: Length, sequence: &mut Sequence) {
     let density = d.0 as i32;
     let length = l.0 as i32;
 
     assert!(sequence.len() == l.0 as usize);
     assert!(density <= length);
 
-    let mut pattern = Vec::<bool, 16>::new();
-    let mut counts = Vec::<i32, 16>::new();
-    let mut remainders = Vec::<i32, 16>::new();
+    let mut pattern = Vec::<bool, MAX_STEPS>::new();
+    let mut counts = Vec::<i32, MAX_STEPS>::new();
+    let mut remainders = Vec::<i32, MAX_STEPS>::new();
     let mut divisor = length - density;
     remainders.push(density).ok();
     let mut level = 0;
@@ -67,9 +71,9 @@ pub fn euclid(d: Density, l: Length, sequence: &mut Vec<bool, 16>) {
 
 fn build(
     level: i32,
-    counts: &Vec<i32, 16>,
-    remainders: &Vec<i32, 16>,
-    pattern: &mut Vec<bool, 16>,
+    counts: &Vec<i32, MAX_STEPS>,
+    remainders: &Vec<i32, MAX_STEPS>,
+    pattern: &mut Sequence,
 ) {
     if level == -1 {
         pattern.push(false).ok();
@@ -101,7 +105,7 @@ mod tests {
         let mut result = Vec::new();
         result.resize_default(16).ok();
 
-        let expected: heapless::Vec<bool, 16> = heapless::Vec::from_slice(&[
+        let expected: Sequence = Vec::from_slice(&[
             ON, OFF, OFF, OFF, ON, OFF, OFF, OFF, ON, OFF, OFF, OFF, ON, OFF, OFF, OFF,
         ])
         .unwrap();
@@ -119,7 +123,7 @@ mod tests {
         let mut result = Vec::new();
         result.resize_default(16).ok();
 
-        let expected: heapless::Vec<bool, 16> = heapless::Vec::from_slice(&[
+        let expected: Sequence = Vec::from_slice(&[
             ON, OFF, ON, OFF, ON, OFF, ON, ON, OFF, ON, OFF, ON, OFF, ON, ON, OFF,
         ])
         .unwrap();
@@ -137,8 +141,8 @@ mod tests {
         let mut result = Vec::new();
         result.resize_default(10).ok();
 
-        let expected: heapless::Vec<bool, 16> =
-            heapless::Vec::from_slice(&[ON, OFF, ON, OFF, OFF, ON, OFF, ON, OFF, OFF]).unwrap();
+        let expected: Sequence =
+            Vec::from_slice(&[ON, OFF, ON, OFF, OFF, ON, OFF, ON, OFF, OFF]).unwrap();
 
         euclid(density, length, &mut result);
 

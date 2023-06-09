@@ -1,5 +1,6 @@
 use heapless::Vec;
 
+use self::components::MAX_STEPS;
 use super::*;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -10,7 +11,7 @@ pub struct Config {
     prob: Prob,
     pwm: Pwm,
     rate: Rate,
-    sequence: Vec<bool, 16>,
+    sequence: Sequence,
 }
 
 impl Default for Config {
@@ -22,11 +23,11 @@ impl Default for Config {
 impl Config {
     pub fn new() -> Self {
         let mut sequence = Vec::new();
-        sequence.resize_default(16).ok();
+        sequence.resize_default(MAX_STEPS).ok();
 
         let mut config = Self {
             density: Density(4),
-            length: Length(16),
+            length: Length(MAX_STEPS as u32),
             output_type: OutputType::Gate,
             prob: Prob::P100,
             pwm: Pwm::P50,
@@ -63,7 +64,7 @@ impl Config {
         self.rate
     }
 
-    pub fn sequence(&self) -> &Vec<bool, 16> {
+    pub fn sequence(&self) -> &Sequence {
         &self.sequence
     }
 

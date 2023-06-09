@@ -1,5 +1,5 @@
 pub use density::Density;
-pub use euclid::euclid;
+pub use euclid::{euclid, Sequence, MAX_STEPS};
 pub use frac::Frac;
 pub use length::Length;
 pub use output_type::OutputType;

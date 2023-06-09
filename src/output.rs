@@ -1,5 +1,5 @@
 pub use self::{
-    components::{euclid, Density, Frac, Length, OutputType, Prob, Pwm, Rate, Rng},
+    components::{euclid, Density, Frac, Length, OutputType, Prob, Pwm, Rate, Rng, Sequence},
     config::Config,
     output_state::{OutputState, OutputStates},
 };
@@ -27,7 +27,7 @@ impl Default for Output {
 
 impl Output {
     pub fn new(resolution: u32, tick: &Tick, config: Config) -> Self {
-        let mut sequence: Vec<bool, 16> = Vec::new();
+        let mut sequence: Sequence = Vec::new();
         sequence.resize_default(config.length().0 as usize).ok();
 
         let mut output = Self {
