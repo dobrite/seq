@@ -228,9 +228,9 @@ mod tests {
         let mut state: OutputState = Default::default();
         let tick = Tick::new(120);
         let rate = Rate::Mult(2, Frac::Zero);
-        let mut config = Config::new();
-        config.set_rate(rate);
+        let config = Config::new();
         let mut output = Output::new(1_920, &tick, config);
+        output.set_rate(&tick, rate);
 
         assert_eq!(960, output.cycle_target);
         assert_eq!(480, output.off_target);
@@ -259,9 +259,9 @@ mod tests {
         let mut state: OutputState = Default::default();
         let tick = Tick::new(120);
         let rate = Rate::Div(5, Frac::OneThird);
-        let mut config = Config::new();
-        config.set_rate(rate);
+        let config = Config::new();
         let mut output = Output::new(1_920, &tick, config);
+        output.set_rate(&tick, rate);
 
         assert_eq!(5_120, output.off_target);
         assert_eq!(10_240, output.cycle_target);
@@ -290,9 +290,9 @@ mod tests {
         let mut state: OutputState = Default::default();
         let tick = Tick::new(120);
         let prob = Prob::P10;
-        let mut config = Config::new();
-        config.set_prob(prob);
+        let config = Config::new();
         let mut output = Output::new(1_920, &tick, config);
+        output.set_prob(prob);
 
         assert_eq!(OFF, state.on);
 
@@ -314,9 +314,9 @@ mod tests {
         let mut state: OutputState = Default::default();
         let tick = Tick::new(120);
         let pwm = Pwm::Pew;
-        let mut config = Config::new();
-        config.set_pwm(pwm);
+        let config = Config::new();
         let mut output = Output::new(1_920, &tick, config);
+        output.set_pwm(&tick, pwm);
         output.tick(1, &mut state);
     }
 
@@ -324,9 +324,9 @@ mod tests {
     fn it_updates_on_at_length_sixteen_at_density_four() {
         let mut state: OutputState = Default::default();
         let tick = Tick::new(120);
-        let mut config = Config::new();
-        config.set_output_type(OutputType::Euclid);
+        let config = Config::new();
         let mut output = Output::new(1_920, &tick, config);
+        output.set_output_type(&tick, OutputType::Euclid);
 
         output.tick(0, &mut state);
         assert_eq!(ON, state.on);
@@ -384,9 +384,9 @@ mod tests {
     fn it_updates_on_change_at_length_sixteen_at_density_four() {
         let mut state: OutputState = Default::default();
         let tick = Tick::new(120);
-        let mut config = Config::new();
-        config.set_output_type(OutputType::Euclid);
+        let config = Config::new();
         let mut output = Output::new(1_920, &tick, config);
+        output.set_output_type(&tick, OutputType::Euclid);
 
         assert_eq!(OFF, state.on_change);
 
@@ -436,9 +436,9 @@ mod tests {
     fn it_updates_index_at_length_sixteen_at_density_four() {
         let mut state: OutputState = Default::default();
         let tick = Tick::new(120);
-        let mut config = Config::new();
-        config.set_output_type(OutputType::Euclid);
+        let config = Config::new();
         let mut output = Output::new(1_920, &tick, config);
+        output.set_output_type(&tick, OutputType::Euclid);
 
         assert_eq!(0, state.index);
 
@@ -488,9 +488,9 @@ mod tests {
     fn it_updates_index_change_at_length_sixteen_at_density_four() {
         let mut state: OutputState = Default::default();
         let tick = Tick::new(120);
-        let mut config = Config::new();
-        config.set_output_type(OutputType::Euclid);
+        let config = Config::new();
         let mut output = Output::new(1_920, &tick, config);
+        output.set_output_type(&tick, OutputType::Euclid);
 
         assert_eq!(OFF, state.index_change);
 
