@@ -42,14 +42,28 @@ impl Seq {
         self.tick.duration_micros
     }
 
-    pub fn tick(&mut self) -> &OutputStates {
+    pub fn tick(&mut self) {
         for (output, state) in self.outputs.iter_mut().zip(self.output_states.iter_mut()) {
             output.tick(self.tick.count, state);
         }
 
         self.tick.count += 1;
+    }
 
-        self.state()
+    pub fn get_index(&self, index: usize) -> usize {
+        self.output_states[index].index
+    }
+
+    pub fn get_index_change(&self, index: usize) -> bool {
+        self.output_states[index].index_change
+    }
+
+    pub fn get_on(&self, index: usize) -> bool {
+        self.output_states[index].on
+    }
+
+    pub fn get_on_change(&self, index: usize) -> bool {
+        self.output_states[index].on_change
     }
 
     pub fn set_bpm(&mut self, bpm: u32) {
@@ -79,11 +93,6 @@ impl Seq {
     pub fn set_output_type(&mut self, index: usize, output_type: OutputType) {
         self.outputs[index].set_output_type(&self.tick, output_type);
     }
-
-    #[inline(always)]
-    fn state(&self) -> &OutputStates {
-        &self.output_states
-    }
 }
 
 #[cfg(test)]
@@ -96,7 +105,6 @@ mod tests {
         let mut configs: Vec<Config, 4> = Vec::new();
         configs.resize_default(4).ok();
         let seq = Seq::new_with_resolution(resolution, 120, configs);
-        let result = seq.state();
 
         let expected = OutputState {
             index: 0,
@@ -106,11 +114,11 @@ mod tests {
             rng: Rng::new(),
         };
 
-        assert_eq!(4, result.len());
-        assert_eq!(expected, result[0]);
-        assert_eq!(expected, result[1]);
-        assert_eq!(expected, result[2]);
-        assert_eq!(expected, result[3]);
+        assert_eq!(4, seq.output_states.len());
+        assert_eq!(expected, seq.output_states[0]);
+        assert_eq!(expected, seq.output_states[1]);
+        assert_eq!(expected, seq.output_states[2]);
+        assert_eq!(expected, seq.output_states[3]);
     }
 
     #[test]
@@ -121,7 +129,6 @@ mod tests {
         let mut seq = Seq::new_with_resolution(resolution, 120, configs);
 
         seq.tick();
-        let result = seq.state();
 
         let expected = OutputState {
             index: 0,
@@ -131,11 +138,10 @@ mod tests {
             rng: Rng::new(),
         };
 
-        assert_eq!(1, result.len());
-        assert_eq!(expected, result[0]);
+        assert_eq!(1, seq.output_states.len());
+        assert_eq!(expected, seq.output_states[0]);
 
         seq.tick();
-        let result = seq.state();
 
         let expected = OutputState {
             index: 0,
@@ -145,7 +151,7 @@ mod tests {
             rng: Rng::new(),
         };
 
-        assert_eq!(1, result.len());
-        assert_eq!(expected, result[0]);
+        assert_eq!(1, seq.output_states.len());
+        assert_eq!(expected, seq.output_states[0]);
     }
 }
