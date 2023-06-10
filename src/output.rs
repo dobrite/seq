@@ -1,5 +1,7 @@
 pub use self::{
-    components::{euclid, Density, Frac, Length, OutputType, Prob, Pwm, Rate, Rng, Sequence},
+    components::{
+        euclid, Density, Frac, Length, OutputType, Prob, Pwm, Rate, Rng, Sequence, MAX_STEPS,
+    },
     config::Config,
     output_state::{OutputState, OutputStates},
 };
@@ -15,6 +17,7 @@ use heapless::Vec;
 pub struct Output {
     config: Config,
     cycle_target: u32,
+    index: Option<usize>,
     off_target: u32,
     resolution: u32,
 }
@@ -33,6 +36,7 @@ impl Output {
         let mut output = Self {
             config,
             cycle_target: 0,
+            index: Option::None,
             off_target: 0,
             resolution,
         };
@@ -90,7 +94,7 @@ impl Output {
         let initial_index = state.index;
 
         if self.is_cycle_starting(count) {
-            state.index = self.calc_index(count);
+            state.index = self.calc_index().unwrap();
             state.on = self.is_on(state);
         } else if self.is_cycle_finished(count) {
             state.on = false;
@@ -101,8 +105,11 @@ impl Output {
     }
 
     #[inline(always)]
-    fn calc_index(&self, count: u32) -> usize {
-        (count / self.cycle_target % self.config.length().0) as usize
+    fn calc_index(&mut self) -> Option<usize> {
+        self.index = self.index.map_or(Option::Some(0), |index| {
+            Option::Some((index + 1) % self.config.length().0 as usize)
+        });
+        self.index
     }
 
     #[inline(always)]
@@ -136,6 +143,7 @@ mod tests {
         let expected = Output {
             config,
             cycle_target: 1_920,
+            index: Option::None,
             off_target: 960,
             resolution: 1_920,
         };
@@ -534,5 +542,62 @@ mod tests {
         assert_eq!(OFF, state.index_change);
         output.tick(7_720, &mut state);
         assert_eq!(OFF, state.index_change);
+    }
+
+    #[test]
+    fn it_updates_index_when_length_changes() {
+        let mut state: OutputState = Default::default();
+        let tick = Tick::new(120);
+        let config = Config::new();
+        let mut output = Output::new(RESOLUTION, &tick, config);
+        output.set_output_type(&tick, OutputType::Euclid);
+        output.set_rate(&tick, Rate::Mult(2, Frac::Zero));
+
+        const CYCLE_TARGET: u32 = 960;
+
+        assert_eq!(0, state.index);
+
+        output.tick(0, &mut state);
+        assert_eq!(0, state.index);
+        output.tick(CYCLE_TARGET, &mut state);
+        assert_eq!(1, state.index);
+        output.tick(CYCLE_TARGET * 2, &mut state);
+        assert_eq!(2, state.index);
+
+        output.set_length(Length(15));
+        output.tick(CYCLE_TARGET * 3, &mut state);
+        assert_eq!(3, state.index);
+        output.tick(CYCLE_TARGET * 4, &mut state);
+        assert_eq!(4, state.index);
+
+        output.set_length(Length(16));
+        output.tick(CYCLE_TARGET * 5, &mut state);
+        assert_eq!(5, state.index);
+        output.tick(CYCLE_TARGET * 6, &mut state);
+        assert_eq!(6, state.index);
+        output.tick(CYCLE_TARGET * 7, &mut state);
+        assert_eq!(7, state.index);
+
+        output.set_length(Length(15));
+        output.tick(CYCLE_TARGET * 8, &mut state);
+        assert_eq!(8, state.index);
+        output.tick(CYCLE_TARGET * 9, &mut state);
+        assert_eq!(9, state.index);
+        output.tick(CYCLE_TARGET * 10, &mut state);
+        assert_eq!(10, state.index);
+        output.tick(CYCLE_TARGET * 11, &mut state);
+        assert_eq!(11, state.index);
+        output.tick(CYCLE_TARGET * 12, &mut state);
+        assert_eq!(12, state.index);
+        output.tick(CYCLE_TARGET * 13, &mut state);
+        assert_eq!(13, state.index);
+        output.tick(CYCLE_TARGET * 14, &mut state);
+        assert_eq!(14, state.index);
+        output.tick(CYCLE_TARGET * 15, &mut state);
+        assert_eq!(0, state.index);
+        output.tick(CYCLE_TARGET * 16, &mut state);
+        assert_eq!(1, state.index);
+        output.tick(CYCLE_TARGET * 17, &mut state);
+        assert_eq!(2, state.index);
     }
 }
