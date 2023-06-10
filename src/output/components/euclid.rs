@@ -9,6 +9,10 @@ pub type Sequence = Vec<bool, MAX_STEPS>;
 // https://github.com/brianhouse/bjorklund (MIT)
 pub fn euclid(d: Density, l: Length, sequence: &mut Sequence) {
     sequence.resize_default(l.0 as usize).unwrap();
+    if d.0 == 0 {
+        return;
+    }
+
     let density = d.0 as i32;
     let length = l.0 as i32;
 
@@ -137,6 +141,19 @@ mod tests {
 
         let expected: Sequence =
             Vec::from_slice(&[ON, OFF, ON, OFF, OFF, ON, OFF, ON, OFF, OFF]).unwrap();
+
+        let mut result = Vec::new();
+        euclid(density, length, &mut result);
+
+        assert_eq!(expected, result);
+    }
+
+    #[test]
+    fn it_builds_a_sequence_of_length_two_at_density_zero() {
+        let density = Density(0);
+        let length = Length(2);
+
+        let expected: Sequence = Vec::from_slice(&[OFF, OFF]).unwrap();
 
         let mut result = Vec::new();
         euclid(density, length, &mut result);
