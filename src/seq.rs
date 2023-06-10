@@ -82,12 +82,8 @@ impl Seq {
         self.outputs[index].set_rate(&self.tick, rate);
     }
 
-    pub fn set_length(&mut self, index: usize, length: Length) {
-        self.outputs[index].set_length(length);
-    }
-
-    pub fn set_density(&mut self, index: usize, density: Density) {
-        self.outputs[index].set_density(density);
+    pub fn set_sequence(&mut self, index: usize, length: Length, density: Density) {
+        self.outputs[index].set_sequence(length, density);
     }
 
     pub fn set_output_type(&mut self, index: usize, output_type: OutputType) {

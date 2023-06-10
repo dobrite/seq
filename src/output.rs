@@ -62,12 +62,8 @@ impl Output {
         }
     }
 
-    pub fn set_density(&mut self, density: Density) {
-        self.config.set_density(density);
-    }
-
-    pub fn set_length(&mut self, length: Length) {
-        self.config.set_length(length);
+    pub fn set_sequence(&mut self, length: Length, density: Density) {
+        self.config.set_sequence(length, density);
     }
 
     pub fn set_output_type(&mut self, tick: &Tick, output_type: OutputType) {
@@ -549,6 +545,7 @@ mod tests {
         let mut state: OutputState = Default::default();
         let tick = Tick::new(120);
         let config = Config::new();
+        let density = config.density();
         let mut output = Output::new(RESOLUTION, &tick, config);
         output.set_output_type(&tick, OutputType::Euclid);
         output.set_rate(&tick, Rate::Mult(2, Frac::Zero));
@@ -564,13 +561,13 @@ mod tests {
         output.tick(CYCLE_TARGET * 2, &mut state);
         assert_eq!(2, state.index);
 
-        output.set_length(Length(15));
+        output.set_sequence(Length(15), density);
         output.tick(CYCLE_TARGET * 3, &mut state);
         assert_eq!(3, state.index);
         output.tick(CYCLE_TARGET * 4, &mut state);
         assert_eq!(4, state.index);
 
-        output.set_length(Length(16));
+        output.set_sequence(Length(16), density);
         output.tick(CYCLE_TARGET * 5, &mut state);
         assert_eq!(5, state.index);
         output.tick(CYCLE_TARGET * 6, &mut state);
@@ -578,7 +575,7 @@ mod tests {
         output.tick(CYCLE_TARGET * 7, &mut state);
         assert_eq!(7, state.index);
 
-        output.set_length(Length(15));
+        output.set_sequence(Length(15), density);
         output.tick(CYCLE_TARGET * 8, &mut state);
         assert_eq!(8, state.index);
         output.tick(CYCLE_TARGET * 9, &mut state);

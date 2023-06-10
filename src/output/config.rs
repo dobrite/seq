@@ -68,13 +68,9 @@ impl Config {
         &self.sequence
     }
 
-    pub fn set_density(&mut self, density: Density) {
-        self.density = density;
-        euclid(self.density, self.length, &mut self.sequence);
-    }
-
-    pub fn set_length(&mut self, length: Length) {
+    pub fn set_sequence(&mut self, length: Length, density: Density) {
         self.length = length;
+        self.density = density;
         self.sequence.resize_default(length.0 as usize).ok();
         euclid(self.density, self.length, &mut self.sequence);
     }
