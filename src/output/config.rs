@@ -22,9 +22,6 @@ impl Default for Config {
 
 impl Config {
     pub fn new() -> Self {
-        let mut sequence = Vec::new();
-        sequence.resize_default(MAX_STEPS).ok();
-
         let mut config = Self {
             density: Density(4),
             length: Length(MAX_STEPS as u32),
@@ -32,7 +29,7 @@ impl Config {
             prob: Prob::P100,
             pwm: Pwm::P50,
             rate: Rate::Unity,
-            sequence,
+            sequence: Vec::new(),
         };
 
         config.set_output_type(config.output_type);
@@ -71,7 +68,6 @@ impl Config {
     pub fn set_sequence(&mut self, length: Length, density: Density) {
         self.length = length;
         self.density = density;
-        self.sequence.resize_default(length.0 as usize).ok();
         euclid(self.density, self.length, &mut self.sequence);
     }
 

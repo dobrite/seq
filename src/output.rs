@@ -11,8 +11,6 @@ mod components;
 mod config;
 mod output_state;
 
-use heapless::Vec;
-
 #[derive(Debug, PartialEq)]
 pub struct Output {
     config: Config,
@@ -30,9 +28,6 @@ impl Default for Output {
 
 impl Output {
     pub fn new(resolution: u32, tick: &Tick, config: Config) -> Self {
-        let mut sequence: Sequence = Vec::new();
-        sequence.resize_default(config.length().0 as usize).ok();
-
         let mut output = Self {
             config,
             cycle_target: 0,
