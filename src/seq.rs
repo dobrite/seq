@@ -9,6 +9,7 @@ pub struct Seq {
     tick: Tick,
     outputs: Vec<Output, 4>,
     output_states: OutputStates,
+    resolution: u32,
 }
 
 impl Default for Seq {
@@ -35,6 +36,7 @@ impl Seq {
             tick,
             outputs,
             output_states,
+            resolution,
         }
     }
 
@@ -64,6 +66,10 @@ impl Seq {
 
     pub fn get_on_change(&self, index: usize) -> bool {
         self.output_states[index].on_change
+    }
+
+    pub fn resolution(&self) -> u32 {
+        self.resolution
     }
 
     pub fn set_bpm(&mut self, bpm: u32) {
