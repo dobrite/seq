@@ -6,35 +6,6 @@ pub const MAX_STEPS: usize = 16;
 
 pub type Sequence = Vec<bool, MAX_STEPS>;
 
-// This generates incorrect sequences compared to
-// PAMs and Euclidean Circles V2
-#[allow(dead_code)]
-fn euclid_wrong(d: Density, l: Length, sequence: &mut Sequence) {
-    let density = d.0 as i32;
-    let length = l.0 as i32;
-
-    assert!(sequence.len() == l.0 as usize);
-    assert!(density <= length);
-
-    let mut error = (2 * density) - length;
-
-    for elem in sequence.iter_mut() {
-        if error > 0 {
-            error -= 2 * length;
-            error += 2 * density;
-
-            *elem = true
-        } else {
-            error += 2 * density;
-
-            *elem = false
-        }
-    }
-
-    let i = sequence.iter().position(|&elem| elem).unwrap_or(0);
-    sequence.rotate_left(i);
-}
-
 // https://github.com/brianhouse/bjorklund (MIT)
 pub fn euclid(d: Density, l: Length, sequence: &mut Sequence) {
     let density = d.0 as i32;
@@ -67,6 +38,35 @@ pub fn euclid(d: Density, l: Length, sequence: &mut Sequence) {
     pattern.rotate_left(i);
 
     *sequence = pattern;
+}
+
+// This generates incorrect sequences compared to
+// PAMs and Euclidean Circles V2
+#[allow(dead_code)]
+fn euclid_wrong(d: Density, l: Length, sequence: &mut Sequence) {
+    let density = d.0 as i32;
+    let length = l.0 as i32;
+
+    assert!(sequence.len() == l.0 as usize);
+    assert!(density <= length);
+
+    let mut error = (2 * density) - length;
+
+    for elem in sequence.iter_mut() {
+        if error > 0 {
+            error -= 2 * length;
+            error += 2 * density;
+
+            *elem = true
+        } else {
+            error += 2 * density;
+
+            *elem = false
+        }
+    }
+
+    let i = sequence.iter().position(|&elem| elem).unwrap_or(0);
+    sequence.rotate_left(i);
 }
 
 fn build(
