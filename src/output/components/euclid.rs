@@ -11,7 +11,7 @@ pub fn euclid(d: Density, l: Length, sequence: &mut Sequence) {
     sequence.resize_default(l.0 as usize).unwrap();
     if d.0 == 0 {
         *sequence = sequence.iter_mut().map(|_| false).collect();
-        return;
+        return
     }
 
     let density = d.0 as i32;
@@ -33,7 +33,7 @@ pub fn euclid(d: Density, l: Length, sequence: &mut Sequence) {
         divisor = remainders[level];
         level += 1;
         if remainders[level] <= 1 {
-            break;
+            break
         }
     }
 
